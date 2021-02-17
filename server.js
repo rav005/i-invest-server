@@ -1,14 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 require('dotenv').config();
-
-const mongoose = require('mongoose');
+var MongoClient = require('mongodb').MongoClient;
 
 const userRoutes = require('./controllers/user');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
- 
+
 // Middleware
 app.use(bodyParser.json());
 
@@ -20,9 +19,10 @@ app.use('/user', userRoutes);
 // to test DB connection
 app.get('/test', async (req, res) => {
     try {
-        await mongoose.connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true }, () => {
+        MongoClient.connect(process.env.DB_URL, { useUnifiedTopology: true }, function (err, client) {
             console.log('connected to DB!');
             res.send('connected to DB!');
+            client.close();
         });
     } catch (err) {
         console.log('Failed to connect to DB. ', err);
