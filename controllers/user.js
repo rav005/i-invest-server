@@ -18,7 +18,7 @@ router.post('/login', async (req, resp) => {
     const user = await findUser(username);
     //    console.log(user);
     if (user && password) {
-        user.comparePassword(password, (err, isMatch) => {
+        user.compareHash(password, (err, isMatch) => {
             if (err || !isMatch) {
                 resp.status(403).send();
                 return;
@@ -51,13 +51,14 @@ router.post('/passwordresetquestion', async (req, resp) => {
     //console.log(user);
     if (user) {
 
-        user.comparePassword(req.body.answer, (err, isMatch) => {
+        user.compareHash(req.body.answer, (err, isMatch) => {
             if (err || !isMatch) {
                 resp.status(403).send();
                 return;
             }
             //console.log('valid answer:', isMatch);
-            resp.status(200).send();
+            const token = generateAccessToken({ username: username }, '120s');
+            resp.status(200).json(token);
         });
     }
     else {
@@ -66,15 +67,21 @@ router.post('/passwordresetquestion', async (req, resp) => {
 })
 
 router.post('/passwordchange', async (req, resp) => {
-    const username = req.body.username;
     const newPassword = req.body.password;
+    const token = req.body.token;
     const newPasswordHash = await User.getHash(newPassword);
     console.log("newpasswordhash: ", newPasswordHash);
-    if (username && newPassword && newPasswordHash) {
-        require('../services/db').connect();
-        const user = await User.updateOne({ username: username }, { password: newPasswordHash });
-        const token = generateAccessToken({ username: username });
-        resp.status(200).json(token);
+    if (token && newPassword && newPasswordHash) {
+        const username = verifyJwt(token);
+        if (username) {
+            require('../services/db').connect();
+            const user = await User.updateOne({ username: username }, { password: newPasswordHash });
+            const token = generateAccessToken({ username: username });
+            resp.status(200).json(token);
+        }
+        else {
+            resp.status(400).send();
+        }
     }
     else {
         resp.status(500).send();
@@ -112,10 +119,22 @@ async function findUser(username) {
     return user;
 }
 
-function generateAccessToken(username) {
+function generateAccessToken(username, expiry = "18000s") {
     // expires after (18000 seconds = 300 minutes)
-    return { token: jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: '18000s' }) };
+    return { token: jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: expiry }) };
 }
 
+function verifyJwt(token) {
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+            return decoded.username;
+        } catch (error) {
+            console.log('jwt token error: ', error);
+            return null;
+        }
+    }
+    return null;
+}
 
 module.exports = router;
