@@ -9,7 +9,6 @@ mongoose.Promise = global.Promise;
 // eslint-disable-next-line max-len
 const mongoUri = process.env.DB_URL
 
-
 function connect() {
     mongoose.set('debug', true);
     mongoose.set('useNewUrlParser', true);
@@ -18,7 +17,12 @@ function connect() {
     return mongoose.connect(mongoUri, { useUnifiedTopology: true, useNewUrlParser: true });
 }
 
+function disconnect() {
+    return mongoose.disconnect();
+}
+
 module.exports = {
     connect,
+    disconnect,
     mongoose
 };

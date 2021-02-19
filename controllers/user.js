@@ -1,26 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
-var MongoClient = require('mongodb').MongoClient;
 const jwt = require("jsonwebtoken");
+const db = require('../services/db');
 
-router.get('/', (req, resp) => {
+router.get('/', async (req, resp) => {
+
     resp.status(200).send({ message: 'user GET' });
 });
 
 router.post('/login', async (req, resp) => {
 
-    console.log("/login ", req.body);
+    //console.log("/login ", req.body);
 
     const username = req.body.username;
     const password = req.body.password;
-
-    require('../services/db').connect();
-    const user = await User.findOne({ username: username });
-
-    //console.log(user);
-    if (user) {
-        user.comparePassword(password, function (err, isMatch) {
+    const user = await findUser(username);
+    //    console.log(user);
+    if (user && password) {
+        user.comparePassword(password, (err, isMatch) => {
             if (err || !isMatch) {
                 resp.status(403).send();
                 return;
@@ -36,15 +34,51 @@ router.post('/login', async (req, resp) => {
 })
 
 router.post('/passwordreset', async (req, resp) => {
-    db.users.find({ id: "WakefieldFamily" })
+    const username = req.body.username;
+    const user = await findUser(username);
+    //console.log(user);
+    if (user) {
+        resp.status(200).json({ "question": user.question });
+    }
+    else {
+        resp.status(404).send();
+    }
 })
 
 router.post('/passwordresetquestion', async (req, resp) => {
-    db.users.find({ id: "WakefieldFamily" })
+    const username = req.body.username;
+    const user = await findUser(username);
+    //console.log(user);
+    if (user) {
+
+        user.comparePassword(req.body.answer, (err, isMatch) => {
+            if (err || !isMatch) {
+                resp.status(403).send();
+                return;
+            }
+            //console.log('valid answer:', isMatch);
+            resp.status(200).send();
+        });
+    }
+    else {
+        resp.status(403).send();
+    }
 })
 
 router.post('/passwordchange', async (req, resp) => {
-    db.users.find({ id: "WakefieldFamily" })
+    const username = req.body.username;
+    const newPassword = req.body.password;
+    const newPasswordHash = await User.getHash(newPassword);
+    console.log("newpasswordhash: ", newPasswordHash);
+    if (username && newPassword && newPasswordHash) {
+        require('../services/db').connect();
+        const user = await User.updateOne({ username: username }, { password: newPasswordHash });
+        const token = generateAccessToken({ username: username });
+        resp.status(200).json(token);
+    }
+    else {
+        resp.status(500).send();
+    }
 })
 
 router.post('/signup', async (req, resp) => {
@@ -69,6 +103,13 @@ function checkServerError(res, error) {
         res.status(500).send(error);
         return error;
     }
+}
+
+async function findUser(username) {
+    db.connect();
+    const user = await User.findOne({ username: username });
+    //db.disconnect();
+    return user;
 }
 
 function generateAccessToken(username) {
