@@ -15,8 +15,7 @@ const AccountSchema = mongoose.Schema({
     min: [0, 'Balance cannot be below 0']
   },
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    type: String,
     required: true
   }
 },
