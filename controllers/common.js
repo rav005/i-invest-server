@@ -24,9 +24,16 @@ async function findUserByUsername(username) {
     return user;
 }
 
+async function findUserById(id) {
+    db.connect();
+    const user = await User.findOne({ _id: id });
+    //db.disconnect();
+    return user;
+}
+
 function generateAccessToken(username, expiry = "18000s") {
     // expires after (18000 seconds = 300 minutes)
-    return { token: jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: expiry }) };
+    return jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: expiry });
 }
 
 function verifyJwt(token) {
@@ -50,6 +57,7 @@ module.exports = {
     log,
     checkServerError,
     findUserByUsername,
+    findUserById,
     generateAccessToken,
     verifyJwt,
     extractUserIdFromResponseLocals

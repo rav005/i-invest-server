@@ -1,7 +1,14 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
 const SALT_WORK_FACTOR = 10;
+
+const watchListType = new mongoose.Schema({
+  name: String,
+  symbol: {
+    type: String,
+    uppercase: true
+  }
+});
 
 const UserSchema = mongoose.Schema({
   username: {
@@ -26,6 +33,7 @@ const UserSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  watchList: [watchListType]
 },
   {
     collection: 'Users'

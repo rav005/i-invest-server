@@ -19,7 +19,8 @@ router.post('/login', async (req, resp) => {
             }
             console.log('valid password:', isMatch);
             const token = common.generateAccessToken({ id: user._id });
-            resp.status(200).json(token);
+            const watchList = user.watchList;
+            resp.status(200).json({ token: token, watchList: watchList });
         });
     }
     else {
@@ -52,7 +53,7 @@ router.post('/passwordresetquestion', async (req, resp) => {
             }
             //console.log('valid answer:', isMatch);
             const token = common.generateAccessToken({ id: user._id }, '120s');
-            resp.status(200).json(token);
+            resp.status(200).json({ token: token });
         });
     }
     else {
@@ -71,7 +72,7 @@ router.post('/passwordchange', async (req, resp) => {
             db.connect();
             const user = await User.updateOne({ _id: id }, { password: newPasswordHash });
             const token = common.generateAccessToken({ id: user._id });
-            resp.status(200).json(token);
+            resp.status(200).json({ token: token });
         }
         else {
             resp.status(400).send();
@@ -94,7 +95,7 @@ router.post('/signup', async (req, resp) => {
             return;
         }
         const token = common.generateAccessToken({ username: username });
-        resp.status(201).json(token);
+        resp.status(201).json({ token: token });
         console.log('user created successfully!');
     });
 });
