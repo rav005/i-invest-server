@@ -21,7 +21,10 @@ router.post('/login', async (req, resp) => {
             console.log('valid password:', isMatch);
             const token = common.generateAccessToken({ id: user._id });
             const watchList = user.watchList;
-            resp.status(200).json({ token: token, watchList: watchList });
+
+            const keys = process.env.API_KEY.split(',');
+
+            resp.status(200).json({ token: token, watchList: watchList, keys: keys });
         });
     }
     else {
