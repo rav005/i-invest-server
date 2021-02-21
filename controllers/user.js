@@ -98,7 +98,7 @@ router.post('/signup', async (req, resp) => {
             console.log("/user/signup err: ", error, ", req: ", req.body);
             return;
         }
-        const token = common.generateAccessToken({ username: username });
+        const token = common.generateAccessToken({ id: user._id });
         resp.status(201).json({ token: token });
         console.log('user created successfully!');
     });
