@@ -1,13 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
-const jwt = require("jsonwebtoken");
-const db = require('../services/db');
-
-router.get('/', async (req, resp) => {
-
-    resp.status(200).send({ message: 'user GET' });
-});
+const common = require('./common');
 
 router.post('/login', async (req, resp) => {
 
@@ -15,16 +9,16 @@ router.post('/login', async (req, resp) => {
 
     const username = req.body.username;
     const password = req.body.password;
-    const user = await findUser(username);
-    //    console.log(user);
+    const user = await common.findUserByUsername(username);
+    //console.log(user);
     if (user && password) {
         user.compareHash(password, (err, isMatch) => {
             if (err || !isMatch) {
                 resp.status(403).send();
                 return;
             }
-            console.log('valid password:', isMatch); // -&gt; Password123: true
-            const token = generateAccessToken({ username: username });
+            console.log('valid password:', isMatch);
+            const token = common.generateAccessToken({ id: user._id });
             resp.status(200).json(token);
         });
     }
@@ -35,7 +29,7 @@ router.post('/login', async (req, resp) => {
 
 router.post('/passwordreset', async (req, resp) => {
     const username = req.body.username;
-    const user = await findUser(username);
+    const user = await common.findUserByUsername(username);
     //console.log(user);
     if (user) {
         resp.status(200).json({ "question": user.question });
@@ -47,7 +41,7 @@ router.post('/passwordreset', async (req, resp) => {
 
 router.post('/passwordresetquestion', async (req, resp) => {
     const username = req.body.username;
-    const user = await findUser(username);
+    const user = await common.findUserByUsername(username);
     //console.log(user);
     if (user) {
 
@@ -57,7 +51,7 @@ router.post('/passwordresetquestion', async (req, resp) => {
                 return;
             }
             //console.log('valid answer:', isMatch);
-            const token = generateAccessToken({ username: username }, '120s');
+            const token = common.generateAccessToken({ id: user._id }, '120s');
             resp.status(200).json(token);
         });
     }
@@ -72,11 +66,11 @@ router.post('/passwordchange', async (req, resp) => {
     const newPasswordHash = await User.getHash(newPassword);
     console.log("newpasswordhash: ", newPasswordHash);
     if (token && newPassword && newPasswordHash) {
-        const username = verifyJwt(token);
+        const id = common.verifyJwt(token);
         if (username) {
-            require('../services/db').connect();
-            const user = await User.updateOne({ username: username }, { password: newPasswordHash });
-            const token = generateAccessToken({ username: username });
+            db.connect();
+            const user = await User.updateOne({ _id: id }, { password: newPasswordHash });
+            const token = common.generateAccessToken({ id: user._id });
             resp.status(200).json(token);
         }
         else {
@@ -92,49 +86,17 @@ router.post('/signup', async (req, resp) => {
     console.log('req body: ', req.body);
     const user = new User(req.body);
 
-    require('../services/db').connect();
+    db.connect();
 
     user.save(error => {
-        if (checkServerError(resp, error)) {
+        if (common.checkServerError(resp, error)) {
             console.log("/user/signup err: ", error, ", req: ", req.body);
             return;
         }
-        const token = generateAccessToken({ username: username });
+        const token = common.generateAccessToken({ username: username });
         resp.status(201).json(token);
         console.log('user created successfully!');
     });
 });
-
-function checkServerError(res, error) {
-    if (error) {
-        res.status(500).send(error);
-        return error;
-    }
-}
-
-async function findUser(username) {
-    db.connect();
-    const user = await User.findOne({ username: username });
-    //db.disconnect();
-    return user;
-}
-
-function generateAccessToken(username, expiry = "18000s") {
-    // expires after (18000 seconds = 300 minutes)
-    return { token: jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: expiry }) };
-}
-
-function verifyJwt(token) {
-    if (token) {
-        try {
-            const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
-            return decoded.username;
-        } catch (error) {
-            console.log('jwt token error: ', error);
-            return null;
-        }
-    }
-    return null;
-}
 
 module.exports = router;
