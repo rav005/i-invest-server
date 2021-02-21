@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const TransactionSchema = mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
     stockSymbol: {
         type: String,
         required: true
@@ -11,7 +15,7 @@ const TransactionSchema = mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['buy', 'sell'],
+        enum: ['buy', 'sell', 'debit', 'credit'],
         required: true
     },
     price: {

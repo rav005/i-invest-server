@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 
 const common = require('./controllers/common');
 
+const mainRoutes = require('./controllers/main');
 const userRoutes = require('./controllers/user');
 const accountRoutes = require('./controllers/account');
 
@@ -49,6 +50,8 @@ app.use(function (req, resp, next) {
 });
 
 // Routes
+
+app.use('/main', mainRoutes);
 
 app.use('/user', userRoutes);
 
