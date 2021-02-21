@@ -38,7 +38,7 @@ app.use(function (req, resp, next) {
     if (!url.includes("/user/")) {
         var token = req.headers.authorization;
 
-        if (token.includes("Bearer ")) {
+        if (token && token.includes("Bearer ")) {
             token = token.replace("Bearer ", "");
         }
 
