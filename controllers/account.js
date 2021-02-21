@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Account = require('../models/account');
+const Stock = require('../models/stock');
 const jwt = require("jsonwebtoken");
 const db = require('../services/db');
 const common = require('./common');
@@ -22,8 +23,11 @@ router.get('/getAccount', async (req, resp) => {
         db.connect();
         const account = await Account.findOne({ _id: accountId });
         common.log("/getAccount", "account: " + account);
+
+        const stocks = await Stock.find({ _id: accountId });
+        common.log("/getAccount", "stocks: " + stocks);
         if (account) {
-            resp.status(200).json({ "account": account });
+            resp.status(200).json({ account: account, stocks: stocks });
         }
         else {
             resp.status(404).json({ "message": "'" + accountId + "' not found" });
