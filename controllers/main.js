@@ -88,5 +88,25 @@ router.post('/removeFromWatchlist', async (req, resp) => {
     }
 });
 
+router.get('/getWatchlist', async (req, resp) => {
+    common.log("/getWatchlist", "req: " + JSON.stringify(req.body));
+
+    const userId = common.extractUserIdFromResponseLocals(resp);
+    if (userId) {
+        var user = await common.findUserById(userId);
+        if (user) {
+            common.log("/getWatchlist", "watchList: " + user.watchList);
+            resp.status(200).json({ "watchList": user.watchList });
+        }
+        else {
+            resp.status(404).json({ "message": "invalid user" });
+        }
+    }
+    else {
+        common.log("/getWatchlist", "error");
+        resp.status(400).json({ "message": "invalid userid" });
+    }
+});
+
 
 module.exports = router;
