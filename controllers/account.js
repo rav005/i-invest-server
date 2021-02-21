@@ -15,7 +15,7 @@ router.get('/getAllAccounts', async (req, resp) => {
     resp.status(200).json({ "accounts": accounts });
 });
 
-router.get('/getAccount', async (req, resp) => {
+router.post('/getAccount', async (req, resp) => {
     common.log("/getAccount", "req: " + JSON.stringify(req.body));
     const accountId = req.body.accountId;
     if (accountId) {
