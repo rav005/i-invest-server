@@ -13,7 +13,7 @@ router.post('/login', async (req, resp) => {
     const user = await common.findUserByUsername(username);
     //console.log(user);
     if (user && password) {
-        user.compareHash(password, (err, isMatch) => {
+        user.comparePassword(password, (err, isMatch) => {
             if (err || !isMatch) {
                 resp.status(403).send();
                 return;
@@ -50,7 +50,7 @@ router.post('/passwordresetquestion', async (req, resp) => {
     //console.log(user);
     if (user) {
 
-        user.compareHash(req.body.answer, (err, isMatch) => {
+        user.compareAnswer(req.body.answer, (err, isMatch) => {
             if (err || !isMatch) {
                 resp.status(403).send();
                 return;
@@ -72,7 +72,7 @@ router.post('/passwordchange', async (req, resp) => {
     console.log("newpasswordhash: ", newPasswordHash);
     if (token && newPassword && newPasswordHash) {
         const id = common.verifyJwt(token);
-        if (username) {
+        if (id) {
             db.connect();
             const user = await User.updateOne({ _id: id }, { password: newPasswordHash });
             const token = common.generateAccessToken({ id: user._id });
