@@ -8,23 +8,6 @@ router.get('/getApiKeys', async (req, resp) => {
     resp.status(200).json({ "keys": keys });
 });
 
-
-router.get('/home', async (req, resp) => {
-    common.log("/home", "req: " + JSON.stringify(req.body));
-
-    const symbols = ['AAPL', 'MSFT', 'TSLA', "AMZN", "GOOG", "AMD"];
-    const respData = [];
-    for (var i = 0; i < 20; i++) {
-        common.log("/home", "i: " + i);
-        for (let symbol of symbols) {
-            if (symbol) {
-                const respData = await api.getDataForSymbol(symbol);
-            }
-        }
-    }
-    resp.status(200).json(respData);
-});
-
 router.get('/search', async (req, resp) => {
     common.log("/search", "req: " + JSON.stringify(req.body));
 
