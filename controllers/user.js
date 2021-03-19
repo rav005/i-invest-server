@@ -14,16 +14,16 @@ router.post('/login', async (req, resp) => {
     const user = await common.findUserByUsername(username);
     //console.log(user);
     if (user && password) {
-        user.comparePassword(password, (err, isMatch) => {
+        user.comparePassword(password, async (err, isMatch) => {
             if (err || !isMatch) {
                 resp.status(403).send();
                 return;
             }
             //console.log('valid password:', isMatch);
             const token = common.generateAccessToken({ id: user._id });
-            console.log(user.watchList);
-            var watchList = api.getRateForWatchList(user.watchList);
-            console.log(watchList);
+            //console.log(user.watchList);
+            var watchList = await api.getRateForWatchList(user.watchList);
+            //console.log("==>", watchList);
             resp.status(200).json({ token: token, watchList: watchList });
         });
     }

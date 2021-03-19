@@ -9,12 +9,14 @@ function getAllAPIkey() {
 
 function getRandomApi() {
     const keys = getAllAPIkey();
-    return keys[Math.floor(Math.random() * keys.length) + 1];
+    return keys[Math.floor(Math.random() * (keys.length - 1)) + 0];
 }
 
 function getApiObject() {
     const api_key = finnhub.ApiClient.instance.authentications['api_key'];
-    api_key.apiKey = getRandomApi();
+    const key = getRandomApi();
+    //console.log(key);
+    api_key.apiKey = key;
     return new finnhub.DefaultApi();
 }
 
@@ -34,42 +36,22 @@ async function getRateForWatchList(watchList) {
     if (!watchList) {
         return;
     }
-
-    Promise.all(watchList.map(async (stock) => {
+    const contents = await Promise.all(watchList.map(async (stock) => {
         return new Promise((resolve, reject) => {
             getApiObject().quote(stock.symbol, (error, data, response) => {
                 if (error) {
                     return reject(error);
                 }
-                var s = {name: stock.name, symbol: stock.symbol, data: data};
+                var s = { name: stock.name, symbol: stock.symbol, data: data };
                 return resolve(s);
             });
         })
     })).then(resp => {
         return resp;
     }).catch(err => {
-        console.log('err => ', err.message);
+        console.log('getRateForWatchList: err => ', err.message);
     });
-
-    // watchList.forEach(stock => {
-    //     console.log( getStockCurrentRate(stock.symbol));
-    // });
-
-    // await Promise.all(watchList.map(async (stock) => {
-
-    //     await getApiObject().quote(stock.symbol, async (error, data, response) => {
-    //         console.log("getStockCurrentRate: ", data);
-    //         //return data;
-    //         stock.quote = data;
-    //     });
-
-    //     //const contents = await fs.readFile(file, 'utf8')
-    //     //console.log(contents)
-    // }));
-
-
-
-    return watchList;
+    return contents;
 }
 
 module.exports = {
