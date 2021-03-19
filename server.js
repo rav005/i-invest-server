@@ -7,6 +7,8 @@ const common = require('./controllers/common');
 const mainRoutes = require('./controllers/main');
 const userRoutes = require('./controllers/user');
 const accountRoutes = require('./controllers/account');
+const stockRoutes = require('./controllers/stock');
+const transactionRoutes = require('./controllers/transaction');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -61,6 +63,10 @@ app.use('/main', mainRoutes);
 app.use('/user', userRoutes);
 
 app.use('/account', accountRoutes);
+
+app.use('/stock', stockRoutes);
+
+app.use('/transaction', transactionRoutes);
 
 // Start listening to server
 app.listen(PORT, () => {
