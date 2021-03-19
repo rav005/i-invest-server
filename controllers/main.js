@@ -3,11 +3,6 @@ const router = express.Router();
 const common = require('./common');
 const api = require('../services/api');
 
-router.get('/getApiKeys', async (req, resp) => {
-    const keys = process.env.API_KEY.split(',');
-    resp.status(200).json({ "keys": keys });
-});
-
 router.get('/search', async (req, resp) => {
     common.log("/search", "req: " + JSON.stringify(req.body));
 

@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/user');
 const common = require('./common');
 const db = require('../services/db');
+const api = require('./api');
 
 router.post('/login', async (req, resp) => {
 
@@ -18,13 +19,12 @@ router.post('/login', async (req, resp) => {
                 resp.status(403).send();
                 return;
             }
-            console.log('valid password:', isMatch);
+            //console.log('valid password:', isMatch);
             const token = common.generateAccessToken({ id: user._id });
-            const watchList = user.watchList;
-
-            const keys = process.env.API_KEY.split(',');
-
-            resp.status(200).json({ token: token, watchList: watchList, keys: keys });
+            console.log(user.watchList);
+            var watchList = api.getRateForWatchList(user.watchList);
+            console.log(watchList);
+            resp.status(200).json({ token: token, watchList: watchList });
         });
     }
     else {
