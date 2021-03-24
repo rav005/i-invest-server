@@ -53,6 +53,50 @@ router.get('/marketNews', async (req, resp) => {
     }
 });
 
+router.post('/companyNews', async (req, resp) => {
+    common.log("/main/companyNews", "req: " + JSON.stringify(req.body));
+
+    const symbol = req.body.symbol;
+    const fromDate = req.body.fromDate;
+    const toDate = req.body.toDate;
+    if (symbol && fromDate && toDate) {
+        const respData = await api.companyNews(symbol, fromDate, toDate);
+        if (respData) {
+            common.log("/main/companyNews: ", respData);
+            resp.status(200).json(respData);
+        }
+        else {
+            common.log("/main/companyNews: err", respData);
+            resp.status(400).send();
+        }
+    }
+    else {
+        resp.status(400).send();
+    }
+});
+
+router.post('/majorPressReleases', async (req, resp) => {
+    common.log("/main/majorPressReleases", "req: " + JSON.stringify(req.body));
+
+    const symbol = req.body.symbol;
+    const fromDate = req.body.fromDate;
+    const toDate = req.body.toDate;
+    if (symbol && fromDate && toDate) {
+        const respData = await api.majorPressReleases(symbol, fromDate, toDate);
+        if (respData) {
+            common.log("/main/majorPressReleases: ", respData);
+            resp.status(200).json(respData);
+        }
+        else {
+            common.log("/main/majorPressReleases: err", respData);
+            resp.status(400).send();
+        }
+    }
+    else {
+        resp.status(400).send();
+    }
+});
+
 router.get('/getStocksfile', async (req, resp) => {
     common.log("/getStocksfile", "req: no param needed");
 

@@ -94,9 +94,39 @@ async function marketNews() {
     }
 }
 
+async function companyNews(symbol, fromDate, toDate) {
+    if (!symbol || !fromDate || !toDate) {
+        return;
+    }
+    const apiUrl = formApiUrl("/company-news?symbol=" + symbol + "&from=" + fromDate + "&to=" + toDate);
+    common.log("/api/companyNews: ", apiUrl);
+    try {
+        const responseData = await axios.get(apiUrl);
+        return responseData.data;
+    } catch (error) {
+        common.log("/api/companyNews/", error);
+    }
+}
+
+async function majorPressReleases(symbol, fromDate, toDate) {
+    if (!symbol || !fromDate || !toDate) {
+        return;
+    }
+    const apiUrl = formApiUrl("/press-releases?symbol=" + symbol + "&from=" + fromDate + "&to=" + toDate);
+    common.log("/api/majorPressReleases: ", apiUrl);
+    try {
+        const responseData = await axios.get(apiUrl);
+        return responseData.data;
+    } catch (error) {
+        common.log("/api/majorPressReleases/", error);
+    }
+}
+
 module.exports = {
     getStockCurrentRate,
     getRateForWatchList,
     search,
-    marketNews
+    marketNews,
+    companyNews,
+    majorPressReleases
 };
