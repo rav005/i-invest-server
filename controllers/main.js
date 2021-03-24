@@ -4,14 +4,35 @@ const common = require('./common');
 const api = require('./api');
 var path = require('path');
 
-router.post('/search', async (req, resp) => {
-    common.log("/search", "req: " + JSON.stringify(req.body));
+// refer to https://finnhub.io/docs/api/symbol-search
+router.post('/searchText', async (req, resp) => {
+    common.log("/searchText", "req: " + JSON.stringify(req.body));
 
     const searchText = req.body.searchText;
     if (searchText) {
         const respData = await api.search(searchText);
         common.log("/search: ", respData);
         resp.status(200).json(respData);
+    }
+    else {
+        resp.status(400).send();
+    }
+});
+
+router.post('/quote', async (req, resp) => {
+    common.log("/main/quote", "req: " + JSON.stringify(req.body));
+
+    const symbol = req.body.symbol;
+    if (symbol) {
+        const respData = await api.getStockCurrentRate(symbol);
+        if (respData) {
+            common.log("/main/quote: ", respData);
+            resp.status(200).json(respData);
+        }
+        else {
+            common.log("/main/quote: err", respData);
+            resp.status(400).send();
+        }
     }
     else {
         resp.status(400).send();

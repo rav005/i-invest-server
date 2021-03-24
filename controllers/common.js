@@ -53,6 +53,11 @@ function extractUserIdFromResponseLocals(resp) {
     return resp.locals.userId;
 }
 
+function isValidQuote(json) {
+    const isZero = (currentValue) => currentValue == 0;
+    return !Object.values(json).every(isZero);
+}
+
 module.exports = {
     log,
     checkServerError,
@@ -60,5 +65,6 @@ module.exports = {
     findUserById,
     generateAccessToken,
     verifyJwt,
-    extractUserIdFromResponseLocals
+    extractUserIdFromResponseLocals,
+    isValidQuote
 };

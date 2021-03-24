@@ -23,20 +23,28 @@ function getApiObject() {
 }
 
 async function getStockCurrentRate(stockSymbol) {
-    getApiObject().quote(stockSymbol).then(res => {
-        console.log('getStockCurrentRate: res => ', err);
+    common.log("/api/getStockCurrentRate", "stockSymbol:" + stockSymbol);
+    if (!stockSymbol) {
+        return null;
+    }
+    const data = await new Promise((resolve, reject) => {
+        getApiObject().quote(stockSymbol, (error, data, response) => {
+            if (error) {
+                return reject(error);
+            }
+            return resolve(data);
+        });
+    }).then(resp => {
+        return resp;
     }).catch(err => {
-        console.log('getStockCurrentRate: err =>', err);
+        common.log("/api/getRateForWatchList: err -> ", err.message);
     });
-    // await getApiObject().quote(stockSymbol, (error, data, response) => {
-    //     console.log("getStockCurrentRate: ", data);
-    //     return data;
-    // });
+    return common.isValidQuote(data) ? data : null;
 }
 
 async function getRateForWatchList(watchList) {
     if (!watchList) {
-        return;
+        return null;
     }
     const contents = await Promise.all(watchList.map(async (stock) => {
         return new Promise((resolve, reject) => {
