@@ -122,11 +122,26 @@ async function majorPressReleases(symbol, fromDate, toDate) {
     }
 }
 
+async function recommendationTrends(symbol) {
+    if (!symbol) {
+        return;
+    }
+    const apiUrl = formApiUrl("/stock/recommendation?symbol=" + symbol);
+    common.log("/api/recommendationTrends: ", apiUrl);
+    try {
+        const responseData = await axios.get(apiUrl);
+        return responseData.data;
+    } catch (error) {
+        common.log("/api/recommendationTrends/", error);
+    }
+}
+
 module.exports = {
     getStockCurrentRate,
     getRateForWatchList,
     search,
     marketNews,
     companyNews,
-    majorPressReleases
+    majorPressReleases,
+    recommendationTrends
 };
