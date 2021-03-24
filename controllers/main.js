@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const common = require('./common');
-const api = require('../services/api');
+const api = require('./api');
+var path = require('path');
 
-router.get('/search', async (req, resp) => {
+router.post('/search', async (req, resp) => {
     common.log("/search", "req: " + JSON.stringify(req.body));
 
-    const symbol = req.body.symbol;
-    if (symbol) {
-        const respData = await api.getDataForSymbol(symbol);
+    const searchText = req.body.searchText;
+    if (searchText) {
+        const respData = await api.search(searchText);
         common.log("/search: ", respData);
         resp.status(200).json(respData);
     }
@@ -16,6 +17,25 @@ router.get('/search', async (req, resp) => {
         resp.status(400).send();
     }
 });
+
+router.get('/getStocksfile', async (req, resp) => {
+    common.log("/getStocksfile", "req: no param needed");
+
+    var options = {
+        root: path.join(__dirname + "/../resources")
+    };
+
+    var fileName = 'stocks.json';
+    resp.sendFile(fileName, options, function (err) {
+        if (err) {
+            common.log("/getStocksfile", err);
+            resp.status(500).send();
+        } else {
+            common.log("/getStocksfile", "resources/stocks.json sent");
+            resp.status(200).send();
+        }
+    });
+})
 
 router.post('/addToWatchlist', async (req, resp) => {
     common.log("/addToWatchlist", "req: " + JSON.stringify(req.body));

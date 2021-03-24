@@ -50,12 +50,12 @@ router.post('/addAccount', async (req, resp) => {
 
     account.save(error => {
         if (common.checkServerError(resp, error)) {
-            console.log("/account/addAccount err: ", error, ", req: ", req.body);
+            common.log("/account/addAccount err: ", error, ", req: ", req.body);
             return;
         }
 
         resp.status(201).json({ "account": account });
-        console.log('account created successfully!');
+        common.log("/account/addAccount", 'account created successfully!');
     });
 });
 

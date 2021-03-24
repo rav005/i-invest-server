@@ -1,5 +1,7 @@
 require('dotenv').config();
 const finnhub = require('finnhub');
+const axios = require('axios');
+const common = require('../controllers/common');
 
 function getAllAPIkey() {
     const keys = process.env.API_KEY.split(',');
@@ -49,12 +51,31 @@ async function getRateForWatchList(watchList) {
     })).then(resp => {
         return resp;
     }).catch(err => {
-        console.log('getRateForWatchList: err => ', err.message);
+        common.log("/api/getRateForWatchList: err -> ", err.message);
     });
     return contents;
 }
 
+async function search(searchText) {
+    const apiUrl = formApiUrl("/search?q=" + searchText.toUpperCase());
+    //common.log("getDataForSymbol: ", apiUrl);
+    try {
+        const responseData = await axios.get(apiUrl);
+        //common.log("getDataForSymbol: ", responseData.data);
+
+        return responseData.data;
+    } catch (error) {
+        common.log("/api/serach/", error);
+    }
+}
+
+function formApiUrl(restOfApiUrl) {
+    return process.env.API_URL + restOfApiUrl + "&token=" + getRandomApi();
+}
+
+
 module.exports = {
     getStockCurrentRate,
-    getRateForWatchList
+    getRateForWatchList,
+    search
 };
