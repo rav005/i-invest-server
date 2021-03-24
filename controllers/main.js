@@ -138,6 +138,26 @@ router.post('/basicFinancials', async (req, resp) => {
     }
 });
 
+router.post('/secFilings', async (req, resp) => {
+    common.log("/main/secFilings", "req: " + JSON.stringify(req.body));
+
+    const symbol = req.body.symbol;
+    if (symbol) {
+        const respData = await api.secFilings(symbol);
+        if (respData) {
+            common.log("/main/secFilings: ", respData);
+            resp.status(200).json(respData);
+        }
+        else {
+            common.log("/main/secFilings: err", respData);
+            resp.status(400).send();
+        }
+    }
+    else {
+        resp.status(400).send();
+    }
+});
+
 router.get('/getStocksfile', async (req, resp) => {
     common.log("/getStocksfile", "req: no param needed");
 

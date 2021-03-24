@@ -137,6 +137,7 @@ async function recommendationTrends(symbol) {
 }
 
 async function basicFinancials(symbol) {
+
     if (!symbol) {
         return;
     }
@@ -150,6 +151,20 @@ async function basicFinancials(symbol) {
     }
 }
 
+async function secFilings(symbol) {
+    if (!symbol) {
+        return;
+    }
+    const apiUrl = formApiUrl("/stock/filings?symbol=" + symbol);
+    common.log("/api/secFilings: ", apiUrl);
+    try {
+        const responseData = await axios.get(apiUrl);
+        return responseData.data;
+    } catch (error) {
+        common.log("/api/secFilings/", error);
+    }
+}
+
 module.exports = {
     getStockCurrentRate,
     getRateForWatchList,
@@ -158,5 +173,6 @@ module.exports = {
     companyNews,
     majorPressReleases,
     recommendationTrends,
-    basicFinancials
+    basicFinancials,
+    secFilings
 };
