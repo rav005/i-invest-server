@@ -64,7 +64,13 @@ async function getRateForWatchList(watchList) {
     return contents;
 }
 
+
+function formApiUrl(restOfApiUrl) {
+    return process.env.API_URL + restOfApiUrl + "&token=" + getRandomApi();
+}
+
 async function search(searchText) {
+    common.log("/api/search: ", apiUrl);
     const apiUrl = formApiUrl("/search?q=" + searchText.toUpperCase());
     //common.log("getDataForSymbol: ", apiUrl);
     try {
@@ -77,13 +83,20 @@ async function search(searchText) {
     }
 }
 
-function formApiUrl(restOfApiUrl) {
-    return process.env.API_URL + restOfApiUrl + "&token=" + getRandomApi();
+async function marketNews() {
+    const apiUrl = formApiUrl("/news?category=general");
+    common.log("/api/marketNews: ", apiUrl);
+    try {
+        const responseData = await axios.get(apiUrl);
+        return responseData.data;
+    } catch (error) {
+        common.log("/api/marketNews/", error);
+    }
 }
-
 
 module.exports = {
     getStockCurrentRate,
     getRateForWatchList,
-    search
+    search,
+    marketNews
 };

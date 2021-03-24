@@ -39,6 +39,20 @@ router.post('/quote', async (req, resp) => {
     }
 });
 
+router.get('/marketNews', async (req, resp) => {
+    common.log("/main/marketNews", "req: no params needed");
+
+    const respData = await api.marketNews();
+    if (respData) {
+        common.log("/main/marketNews: ", respData);
+        resp.status(200).json(respData);
+    }
+    else {
+        common.log("/main/marketNews: err", respData);
+        resp.status(400).send();
+    }
+});
+
 router.get('/getStocksfile', async (req, resp) => {
     common.log("/getStocksfile", "req: no param needed");
 
