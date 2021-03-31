@@ -36,7 +36,6 @@ app.use(function (req, res, next) {
 });
 
 app.use(function (req, resp, next) {
-    var isValidRequest = true;
     const url = req.url;
     if (!url.includes("/user/")) {
         var token = req.headers.authorization;
@@ -52,12 +51,10 @@ app.use(function (req, resp, next) {
         }
         else {
             resp.status(401).send();
-            isValidRequest = false;
+            return;
         }
     }
-    if (isValidRequest && resp && resp.statusCode != 401) {
-        next();
-    }
+    next();
 });
 
 // Routes
