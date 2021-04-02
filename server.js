@@ -37,7 +37,7 @@ app.use(function (req, res, next) {
 
 app.use(function (req, resp, next) {
     const url = req.url;
-    if (!url.includes("/user/")) {
+    if (!url.includes("/user/") && !url.includes("/status")) {
         var token = req.headers.authorization;
 
         if (token && token.includes("Bearer ")) {
@@ -67,6 +67,10 @@ app.use('/account', accountRoutes);
 app.use('/stock', stockRoutes);
 
 app.use('/transaction', transactionRoutes);
+
+app.get('/status', (req, resp) => {
+    resp.status(200).send();
+});
 
 // Start listening to server
 app.listen(PORT, () => {
