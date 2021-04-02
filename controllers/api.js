@@ -122,11 +122,57 @@ async function majorPressReleases(symbol, fromDate, toDate) {
     }
 }
 
+async function recommendationTrends(symbol) {
+    if (!symbol) {
+        return;
+    }
+    const apiUrl = formApiUrl("/stock/recommendation?symbol=" + symbol);
+    common.log("/api/recommendationTrends: ", apiUrl);
+    try {
+        const responseData = await axios.get(apiUrl);
+        return responseData.data;
+    } catch (error) {
+        common.log("/api/recommendationTrends/", error);
+    }
+}
+
+async function basicFinancials(symbol) {
+
+    if (!symbol) {
+        return;
+    }
+    const apiUrl = formApiUrl("/stock/metric?symbol=" + symbol + "&metric=all");
+    common.log("/api/basicFinancials: ", apiUrl);
+    try {
+        const responseData = await axios.get(apiUrl);
+        return responseData.data;
+    } catch (error) {
+        common.log("/api/basicFinancials/", error);
+    }
+}
+
+async function secFilings(symbol) {
+    if (!symbol) {
+        return;
+    }
+    const apiUrl = formApiUrl("/stock/filings?symbol=" + symbol);
+    common.log("/api/secFilings: ", apiUrl);
+    try {
+        const responseData = await axios.get(apiUrl);
+        return responseData.data;
+    } catch (error) {
+        common.log("/api/secFilings/", error);
+    }
+}
+
 module.exports = {
     getStockCurrentRate,
     getRateForWatchList,
     search,
     marketNews,
     companyNews,
-    majorPressReleases
+    majorPressReleases,
+    recommendationTrends,
+    basicFinancials,
+    secFilings
 };
