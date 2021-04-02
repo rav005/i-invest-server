@@ -58,6 +58,30 @@ function isValidQuote(json) {
     return !Object.values(json).every(isZero);
 }
 
+function formatDate(date) {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2)
+        month = '0' + month;
+    if (day.length < 2)
+        day = '0' + day;
+
+    return [year, month, day].join('-');
+}
+
+function getFromDate() {
+    var d = new Date();
+    d.setDate(d.getDate() - 21);
+    return formatDate(d);
+}
+
+function getToDate() {
+    return formatDate(new Date());
+}
+
 module.exports = {
     log,
     checkServerError,
@@ -66,5 +90,7 @@ module.exports = {
     generateAccessToken,
     verifyJwt,
     extractUserIdFromResponseLocals,
-    isValidQuote
+    isValidQuote,
+    getFromDate,
+    getToDate
 };
