@@ -3,6 +3,21 @@ const finnhub = require('finnhub');
 const axios = require('axios');
 const common = require('../controllers/common');
 
+function getAllSandboxAPIkey() {
+    const keys = process.env.SANDBOX_API_KEY.split(',');
+    //console.log("api keys: ", keys);
+    return keys;
+}
+
+function getSandboxRandomApi() {
+    const keys = getAllSandboxAPIkey();
+    return keys[Math.floor(Math.random() * (keys.length - 1)) + 0];
+}
+
+function formSandboxApiUrl(restOfApiUrl) {
+    return process.env.API_URL + restOfApiUrl + "&token=" + getSandboxRandomApi();
+}
+
 function getAllAPIkey() {
     const keys = process.env.API_KEY.split(',');
     //console.log("api keys: ", keys);
@@ -12,6 +27,10 @@ function getAllAPIkey() {
 function getRandomApi() {
     const keys = getAllAPIkey();
     return keys[Math.floor(Math.random() * (keys.length - 1)) + 0];
+}
+
+function formApiUrl(restOfApiUrl) {
+    return process.env.API_URL + restOfApiUrl + "&token=" + getRandomApi();
 }
 
 function getApiObject() {
@@ -65,13 +84,11 @@ async function getRateForWatchList(watchList) {
 }
 
 
-function formApiUrl(restOfApiUrl) {
-    return process.env.API_URL + restOfApiUrl + "&token=" + getRandomApi();
-}
+
 
 async function search(searchText) {
     common.log("/api/search: ", apiUrl);
-    const apiUrl = formApiUrl("/search?q=" + searchText.toUpperCase());
+    const apiUrl = formSandboxApiUrl("/search?q=" + searchText.toUpperCase());
     //common.log("getDataForSymbol: ", apiUrl);
     try {
         const responseData = await axios.get(apiUrl);
@@ -108,25 +125,11 @@ async function companyNews(symbol, fromDate, toDate) {
     }
 }
 
-async function majorPressReleases(symbol, fromDate, toDate) {
-    if (!symbol || !fromDate || !toDate) {
-        return;
-    }
-    const apiUrl = formApiUrl("/press-releases?symbol=" + symbol + "&from=" + fromDate + "&to=" + toDate);
-    common.log("/api/majorPressReleases: ", apiUrl);
-    try {
-        const responseData = await axios.get(apiUrl);
-        return responseData.data;
-    } catch (error) {
-        common.log("/api/majorPressReleases/", error);
-    }
-}
-
 async function recommendationTrends(symbol) {
     if (!symbol) {
         return;
     }
-    const apiUrl = formApiUrl("/stock/recommendation?symbol=" + symbol);
+    const apiUrl = formSandboxApiUrl("/stock/recommendation?symbol=" + symbol);
     common.log("/api/recommendationTrends: ", apiUrl);
     try {
         const responseData = await axios.get(apiUrl);
@@ -141,7 +144,7 @@ async function basicFinancials(symbol) {
     if (!symbol) {
         return;
     }
-    const apiUrl = formApiUrl("/stock/metric?symbol=" + symbol + "&metric=all");
+    const apiUrl = formSandboxApiUrl("/stock/metric?symbol=" + symbol + "&metric=all");
     common.log("/api/basicFinancials: ", apiUrl);
     try {
         const responseData = await axios.get(apiUrl);
@@ -155,7 +158,7 @@ async function secFilings(symbol) {
     if (!symbol) {
         return;
     }
-    const apiUrl = formApiUrl("/stock/filings?symbol=" + symbol);
+    const apiUrl = formSandboxApiUrl("/stock/filings?symbol=" + symbol);
     common.log("/api/secFilings: ", apiUrl);
     try {
         const responseData = await axios.get(apiUrl);
@@ -171,7 +174,6 @@ module.exports = {
     search,
     marketNews,
     companyNews,
-    majorPressReleases,
     recommendationTrends,
     basicFinancials,
     secFilings
