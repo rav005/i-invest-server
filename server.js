@@ -39,7 +39,8 @@ app.use(function (req, res, next) {
 
 app.use(function (req, resp, next) {
     const url = req.url;
-    if (!url.includes("/user/") && !url.includes("/status") && !url.includes("/getStocksfile")) {
+    if (!url.includes("/user/") && !url.includes("/status") && !url.includes("/getStocksfile")
+        && !url.includes("/forex")) {
         var token = req.headers.authorization;
 
         if (token && token.includes("Bearer ")) {
@@ -83,5 +84,5 @@ cron.schedule('*/5 * * * *', function () {
 
 // Start listening to server
 app.listen(PORT, () => {
-    common.log("", 'server is running on port: ' + PORT);
+    common.log("", 'server is running on port: ', PORT);
 });

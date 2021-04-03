@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const common = require('./common');
 const api = require('./api');
+const axios = require('axios');
 var path = require('path');
+const e = require('express');
 
 // refer to https://finnhub.io/docs/api/symbol-search
 router.post('/searchText', async (req, resp) => {
@@ -51,5 +53,32 @@ router.get('/getStocksfile', async (req, resp) => {
         }
     });
 })
+
+router.get('/forex', async (req, resp) => {
+    common.log("", "/main/forex", "req: " + JSON.stringify(req.body));
+    const from = req.body.from;
+    const to = req.body.to;
+    if (from && to) {
+
+        try {
+            apiUrl = "https://api.ratesapi.io/api/latest?base=" + from.toUpperCase() + "&symbols=" + to.toUpperCase();
+            const responseData = await axios.get(apiUrl);
+            if (responseData.status == 200) {
+                const rate = responseData.data.rates[to];
+                common.log("", "/main/forex", "rate:" + JSON.stringify(responseData.data));
+                resp.status(200).json({ "rate": rate });
+            }
+            else {
+                resp.status(400).send();
+            }
+        } catch (err) {
+            common.log("", "/main/forex", "err:" + err);
+            resp.status(400).send();
+        }
+    }
+    else {
+        resp.status(400).json({ "message": "from currency and to currency request params required" });
+    }
+});
 
 module.exports = router;
