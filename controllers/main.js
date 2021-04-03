@@ -24,7 +24,7 @@ router.get('/marketNews', async (req, resp) => {
 
     const respData = await api.marketNews();
     if (respData) {
-        common.log("/main/marketNews: ", respData);
+        common.log("/main/marketNews: ", respData.length);
         resp.status(200).json(respData);
     }
     else {
@@ -41,13 +41,13 @@ router.get('/getStocksfile', async (req, resp) => {
     };
 
     var fileName = 'stocks.json';
-    resp.sendFile(fileName, options, function (err) {
+    resp.status(200).sendFile(fileName, options, function (err) {
         if (err) {
             common.log("/getStocksfile", err);
-            resp.status(500).send();
+            //resp.status(500).send();
         } else {
             common.log("/getStocksfile", "resources/stocks.json sent");
-            resp.status(200).send();
+            //resp.status(200).send();
         }
     });
 })

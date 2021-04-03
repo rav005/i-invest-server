@@ -72,6 +72,7 @@ app.use('/stock', stockRoutes);
 app.use('/transaction', transactionRoutes);
 
 app.get('/status', (req, resp) => {
+    common.log("/status", "code: 200");
     resp.status(200).send();
 });
 
@@ -79,8 +80,6 @@ app.get('/status', (req, resp) => {
 cron.schedule('*/5 * * * *', function () {
     cronjob.transaction();
 });
-
-
 
 // Start listening to server
 app.listen(PORT, () => {

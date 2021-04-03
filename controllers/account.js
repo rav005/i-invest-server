@@ -12,7 +12,7 @@ router.get('/getAllAccounts', async (req, resp) => {
 
     db.connect();
     const accounts = await Account.find({ userId: userId });
-    common.log("/getAllAccounts", "accounts: " + accounts);
+    common.log("/getAllAccounts", "accounts: " + JSON.stringify(accounts));
     resp.status(200).json({ "accounts": accounts });
 });
 
@@ -22,10 +22,10 @@ router.post('/getAccount', async (req, resp) => {
     if (accountId) {
         db.connect();
         const account = await Account.findOne({ _id: accountId });
-        common.log("/getAccount", "account: " + account);
+        common.log("/getAccount", "account: " + JSON.stringify(account));
 
         const stocks = await Stock.find({ _id: accountId });
-        common.log("/getAccount", "stocks: " + stocks);
+        common.log("/getAccount", "stocks: " + JSON.stringify(stocks));
         if (account) {
             resp.status(200).json({ account: account, stocks: stocks });
         }
@@ -50,7 +50,7 @@ router.post('/addAccount', async (req, resp) => {
 
     account.save(error => {
         if (common.checkServerError(resp, error)) {
-            common.log("/account/addAccount err: ", error, ", req: ", req.body);
+            common.log("/account/addAccount err: ", error, ", req: ", JSON.stringify(req.body));
             return;
         }
 
