@@ -76,4 +76,29 @@ router.post('/deleteAccount', async (req, resp) => {
     }
 });
 
+router.post('/newBalance', async (req, resp) => {
+    common.log("/newBalance", "req: " + JSON.stringify(req.body));
+
+    const userId = common.extractUserIdFromResponseLocals(resp);
+    const accountId = req.body.accountId;
+    const newBalance = req.body.newBalance;
+
+    try {
+        db.connect();
+        const dbUpdateResponse = await Account.updateOne({ _id: accountId, userId: userId }, { balance: newBalance });
+
+        if (dbUpdateResponse && dbUpdateResponse.n == 1) {
+            common.log("/newBalance", "updated balance");
+            resp.status(200).send();
+        }
+        else {
+            common.log("/newBalance", "userid/account not found");
+            resp.status(400).send();
+        }
+    } catch (err) {
+        common.log("/newBalance", "err: " + JSON.stringify(err));
+        resp.status(400).send();
+    }
+});
+
 module.exports = router;
