@@ -87,21 +87,28 @@ router.post('/newBalance', async (req, resp) => {
     const accountId = req.body.accountId;
     const newBalance = req.body.newBalance;
 
-    try {
-        db.connect();
-        const dbUpdateResponse = await Account.updateOne({ _id: accountId, userId: userId }, { balance: newBalance });
+    if (accountId && newBalance) {
 
-        if (dbUpdateResponse && dbUpdateResponse.n == 1) {
-            common.log(userId, "/newBalance", "updated balance");
-            resp.status(200).send();
-        }
-        else {
-            common.log(userId, "/newBalance", "userid/account not found");
+        try {
+            db.connect();
+            const dbUpdateResponse = await Account.updateOne({ _id: accountId, userId: userId }, { balance: newBalance });
+
+            if (dbUpdateResponse && dbUpdateResponse.n == 1) {
+                common.log(userId, "/newBalance", "updated balance");
+                resp.status(200).send();
+            }
+            else {
+                common.log(userId, "/newBalance", "userid/account not found");
+                resp.status(400).send();
+            }
+        } catch (err) {
+            common.log(userId, "/newBalance", "err: " + JSON.stringify(err));
             resp.status(400).send();
         }
-    } catch (err) {
-        common.log(userId, "/newBalance", "err: " + JSON.stringify(err));
-        resp.status(400).send();
+    }
+    else {
+        common.log(userId, "/newBalance", "accountId/new balance is invalid: " + JSON.stringify(req.body));
+        resp.status(400).json({ "message": "accountId/new balance is invalid" });
     }
 });
 
