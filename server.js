@@ -1,8 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
+const cron = require('node-cron');
 
 const common = require('./controllers/common');
+const cronjob = require('./controllers/cronjob');
 
 const mainRoutes = require('./controllers/main');
 const userRoutes = require('./controllers/user');
@@ -72,6 +74,13 @@ app.use('/transaction', transactionRoutes);
 app.get('/status', (req, resp) => {
     resp.status(200).send();
 });
+
+// cron
+cron.schedule('*/5 * * * *', function () {
+    cronjob.transaction();
+});
+
+
 
 // Start listening to server
 app.listen(PORT, () => {
