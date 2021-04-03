@@ -8,13 +8,13 @@ const common = require('./common');
 const api = require('./api');
 
 router.get('/getWatchlist', async (req, resp) => {
-    common.log("/getWatchlist", "req: " + JSON.stringify(req.body));
-
     const userId = common.extractUserIdFromResponseLocals(resp);
+    common.log(userId, "/getWatchlist", "req: " + JSON.stringify(req.body));
+
     if (userId) {
         var user = await common.findUserById(userId);
         if (user) {
-            common.log("/getWatchlist", "watchList: " + user.watchList);
+            common.log("userId, /getWatchlist", "watchList: " + user.watchList);
             var watchList = await api.getRateForWatchList(user.watchList);
             resp.status(200).json({ watchList: watchList });
         }
@@ -23,23 +23,24 @@ router.get('/getWatchlist', async (req, resp) => {
         }
     }
     else {
-        common.log("/getWatchlist", "error");
+        common.log(userId, "/getWatchlist", "error");
         resp.status(400).json({ "message": "invalid userid" });
     }
 });
 
 router.post('/quote', async (req, resp) => {
-    common.log("/main/quote", "req: " + JSON.stringify(req.body));
+    const userId = common.extractUserIdFromResponseLocals(resp);
+    common.log(userId, "/main/quote", "req: " + JSON.stringify(req.body));
 
     const symbol = req.body.symbol;
     if (symbol) {
         const respData = await api.getStockCurrentRate(symbol);
         if (respData) {
-            common.log("/main/quote: ", respData);
+            common.log(userId, "/main/quote: ", respData);
             resp.status(200).json(respData);
         }
         else {
-            common.log("/main/quote: err", respData);
+            common.log(userId, "/main/quote: err", respData);
             resp.status(400).send();
         }
     }
@@ -49,7 +50,8 @@ router.post('/quote', async (req, resp) => {
 });
 
 router.post('/companyNews', async (req, resp) => {
-    common.log("/main/companyNews", "req: " + JSON.stringify(req.body));
+    const userId = common.extractUserIdFromResponseLocals(resp);
+    common.log(userId, "/main/companyNews", "req: " + JSON.stringify(req.body));
 
     const symbol = req.body.symbol;
     const fromDate = common.getFromDate();
@@ -57,11 +59,11 @@ router.post('/companyNews', async (req, resp) => {
     if (symbol && fromDate && toDate) {
         const respData = await api.companyNews(symbol, fromDate, toDate);
         if (respData) {
-            common.log("/main/companyNews: ", respData);
+            common.log(userId, "/main/companyNews: ", respData);
             resp.status(200).json(respData);
         }
         else {
-            common.log("/main/companyNews: err", respData);
+            common.log(userId, "/main/companyNews: err", respData);
             resp.status(400).send();
         }
     }
@@ -71,17 +73,18 @@ router.post('/companyNews', async (req, resp) => {
 });
 
 router.post('/recommendationTrends', async (req, resp) => {
-    common.log("/main/recommendationTrends", "req: " + JSON.stringify(req.body));
+    const userId = common.extractUserIdFromResponseLocals(resp);
+    common.log(userId, "/main/recommendationTrends", "req: " + JSON.stringify(req.body));
 
     const symbol = req.body.symbol;
     if (symbol) {
         const respData = await api.recommendationTrends(symbol);
         if (respData) {
-            common.log("/main/recommendationTrends: ", respData);
+            common.log(userId, "/main/recommendationTrends: ", respData);
             resp.status(200).json(respData);
         }
         else {
-            common.log("/main/recommendationTrends: err", respData);
+            common.log(userId, "/main/recommendationTrends: err", respData);
             resp.status(400).send();
         }
     }
@@ -91,17 +94,18 @@ router.post('/recommendationTrends', async (req, resp) => {
 });
 
 router.post('/basicFinancials', async (req, resp) => {
-    common.log("/main/basicFinancials", "req: " + JSON.stringify(req.body));
+    const userId = common.extractUserIdFromResponseLocals(resp);
+    common.log(userId, "/main/basicFinancials", "req: " + JSON.stringify(req.body));
 
     const symbol = req.body.symbol;
     if (symbol) {
         const respData = await api.basicFinancials(symbol);
         if (respData) {
-            common.log("/main/basicFinancials: ", respData);
+            common.log(userId, "/main/basicFinancials: ", respData);
             resp.status(200).json(respData);
         }
         else {
-            common.log("/main/basicFinancials: err", respData);
+            common.log(userId, "/main/basicFinancials: err", respData);
             resp.status(400).send();
         }
     }
@@ -112,17 +116,18 @@ router.post('/basicFinancials', async (req, resp) => {
 
 
 router.post('/secFilings', async (req, resp) => {
-    common.log("/main/secFilings", "req: " + JSON.stringify(req.body));
+    const userId = common.extractUserIdFromResponseLocals(resp);
+    common.log(userId, "/main/secFilings", "req: " + JSON.stringify(req.body));
 
     const symbol = req.body.symbol;
     if (symbol) {
         const respData = await api.secFilings(symbol);
         if (respData) {
-            common.log("/main/secFilings: ", respData);
+            common.log(userId, "/main/secFilings: ", respData);
             resp.status(200).json(respData);
         }
         else {
-            common.log("/main/secFilings: err", respData);
+            common.log(userId, "/main/secFilings: err", respData);
             resp.status(400).send();
         }
     }
@@ -132,9 +137,9 @@ router.post('/secFilings', async (req, resp) => {
 });
 
 router.post('/addToWatchlist', async (req, resp) => {
-    common.log("/addToWatchlist", "req: " + JSON.stringify(req.body));
-
     const userId = common.extractUserIdFromResponseLocals(resp);
+    common.log(userId, "/addToWatchlist", "req: " + JSON.stringify(req.body));
+
     const stockName = req.body.stockName;
     const symbol = req.body.symbol.toUpperCase();
     if (userId && stockName && symbol) {
@@ -142,20 +147,20 @@ router.post('/addToWatchlist', async (req, resp) => {
         var user = await common.findUserById(userId);
 
         const hasSymbol = user.watchList.find(value => value.symbol === symbol);
-        //common.log("/addToWatchlist", user.watchList);
+        //common.log(userId,"/addToWatchlist", user.watchList);
         if (hasSymbol) {
-            common.log("/addToWatchlist", "symbol exists");
+            common.log(userId, "/addToWatchlist", "symbol exists");
             resp.status(400).json({ "message": "symbol exists" });
         } else {
-            //common.log("/addToWatchlist", "user: " + JSON.stringify(user));
+            //common.log(userId,"/addToWatchlist", "user: " + JSON.stringify(user));
             user.watchList.push({ name: stockName, symbol: symbol });
             user.save(error => {
                 if (common.checkServerError(resp, error)) {
-                    console.log("/addToWatchlist err: ", error, ", req: ", req.body);
+                    console.log(userId, "/addToWatchlist err: ", error, ", req: ", req.body);
                     return;
                 }
                 resp.status(201).send();
-                common.log("/addToWatchlist: ", 'added to watchlist');
+                common.log(userId, "/addToWatchlist: ", 'added to watchlist');
             });
         }
     }
@@ -165,9 +170,9 @@ router.post('/addToWatchlist', async (req, resp) => {
 });
 
 router.post('/removeFromWatchlist', async (req, resp) => {
-    common.log("/removeFromWatchlist", "req: " + JSON.stringify(req.body));
-
     const userId = common.extractUserIdFromResponseLocals(resp);
+    common.log(userId, "/removeFromWatchlist", "req: " + JSON.stringify(req.body));
+
     const symbol = req.body.symbol.toUpperCase();
     if (userId && symbol) {
 
@@ -175,11 +180,11 @@ router.post('/removeFromWatchlist', async (req, resp) => {
         user.watchList = user.watchList.filter(value => value.symbol !== symbol);
         user.save(error => {
             if (common.checkServerError(resp, error)) {
-                console.log("/removeFromWatchlist err: ", error, ", req: ", req.body);
+                console.log(userId, "/removeFromWatchlist err: ", error, ", req: ", req.body);
                 return;
             }
             resp.status(200).json({ "message": "symbol removed from watchlist" });
-            common.log("/removeFromWatchlist : ", 'removed from watchlist');
+            common.log(userId, "/removeFromWatchlist : ", 'removed from watchlist');
         });
     }
     else {
@@ -189,8 +194,8 @@ router.post('/removeFromWatchlist', async (req, resp) => {
 
 router.post('/buyStock', async (req, resp) => {
 
-    common.log("/buyStock", "req: " + JSON.stringify(req.body));
     const userId = common.extractUserIdFromResponseLocals(resp);
+    common.log(userId, "/buyStock", "req: " + JSON.stringify(req.body));
 
     var reqBody = req.body;
     reqBody.userId = userId;
@@ -200,17 +205,18 @@ router.post('/buyStock', async (req, resp) => {
 
     stock.save(error => {
         if (common.checkServerError(resp, error)) {
-            console.log("/stock/buyStock err: ", error, ", req: ", req.body);
+            console.log(userId, "/stock/buyStock err: ", error, ", req: ", req.body);
             return;
         }
 
         resp.status(201).json({ "stock": stock });
-        console.log('stock created successfully!');
+        console.log(userId, 'stock created successfully!');
     });
 });
 
 router.post('/sellStock', async (req, resp) => {
-    common.log("/deleteAccount", "req: " + JSON.stringify(req.body));
+    const userId = common.extractUserIdFromResponseLocals(resp);
+    common.log(userId, "/deleteAccount", "req: " + JSON.stringify(req.body));
     const accountId = req.body.accountId;
     if (accountId) {
         db.connect();

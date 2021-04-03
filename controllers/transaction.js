@@ -7,25 +7,26 @@ const db = require('../services/db');
 const common = require('./common');
 
 router.get('/getAllAccounts', async (req, resp) => {
-    common.log("/getAllAccounts", "req: " + JSON.stringify(req.body));
     const userId = common.extractUserIdFromResponseLocals(resp);
+    common.log(userId, "/getAllAccounts", "req: " + JSON.stringify(req.body));
 
     db.connect();
     const accounts = await Account.find({ userId: userId });
-    common.log("/getAllAccounts", "accounts: " + accounts);
+    common.log(userId, "/getAllAccounts", "accounts: " + accounts);
     resp.status(200).json({ "accounts": accounts });
 });
 
 router.post('/getAccount', async (req, resp) => {
-    common.log("/getAccount", "req: " + JSON.stringify(req.body));
+    const userId = common.extractUserIdFromResponseLocals(resp);
+    common.log(userId, "/getAccount", "req: " + JSON.stringify(req.body));
     const accountId = req.body.accountId;
     if (accountId) {
         db.connect();
         const account = await Account.findOne({ _id: accountId });
-        common.log("/getAccount", "account: " + account);
+        common.log(userId, "/getAccount", "account: " + account);
 
         const stocks = await Stock.find({ _id: accountId });
-        common.log("/getAccount", "stocks: " + stocks);
+        common.log(userId, "/getAccount", "stocks: " + stocks);
         if (account) {
             resp.status(200).json({ account: account, stocks: stocks });
         }
@@ -39,8 +40,8 @@ router.post('/getAccount', async (req, resp) => {
 });
 
 router.post('/addAccount', async (req, resp) => {
-    common.log("/getAllAccounts", "req: " + JSON.stringify(req.body));
     const userId = common.extractUserIdFromResponseLocals(resp);
+    common.log(userId, "/getAllAccounts", "req: " + JSON.stringify(req.body));
 
     var reqBody = req.body;
     reqBody.userId = userId;
@@ -50,17 +51,18 @@ router.post('/addAccount', async (req, resp) => {
 
     account.save(error => {
         if (common.checkServerError(resp, error)) {
-            console.log("/account/addAccount err: ", error, ", req: ", req.body);
+            console.log(userId, "/account/addAccount err: ", error, ", req: ", req.body);
             return;
         }
 
         resp.status(201).json({ "account": account });
-        console.log('account created successfully!');
+        console.log(userId, 'account created successfully!');
     });
 });
 
 router.post('/deleteAccount', async (req, resp) => {
-    common.log("/deleteAccount", "req: " + JSON.stringify(req.body));
+    const userId = common.extractUserIdFromResponseLocals(resp);
+    common.log(userId, "/deleteAccount", "req: " + JSON.stringify(req.body));
     const accountId = req.body.accountId;
     if (accountId) {
         db.connect();

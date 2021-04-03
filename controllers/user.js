@@ -69,8 +69,8 @@ router.post('/passwordchange', async (req, resp) => {
     const newPassword = req.body.password;
     const token = req.body.token;
     const newPasswordHash = await User.getHash(newPassword);
-    console.log("newpasswordhash: ", newPasswordHash);
     if (token && newPassword && newPasswordHash) {
+        //console.log("newpasswordhash: ", newPasswordHash);
         const id = common.verifyJwt(token);
         if (id) {
             db.connect();
@@ -88,7 +88,7 @@ router.post('/passwordchange', async (req, resp) => {
 })
 
 router.post('/signup', async (req, resp) => {
-    console.log('req body: ', req.body);
+    //console.log('req body: ', req.body);
     const user = new User(req.body);
 
     db.connect();

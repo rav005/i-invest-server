@@ -5,7 +5,7 @@ const common = require('../controllers/common');
 
 function getAllSandboxAPIkey() {
     const keys = process.env.SANDBOX_API_KEY.split(',');
-    //console.log("api keys: ", keys);
+    //common.log("api keys: ", keys);
     return keys;
 }
 
@@ -20,7 +20,7 @@ function formSandboxApiUrl(restOfApiUrl) {
 
 function getAllAPIkey() {
     const keys = process.env.API_KEY.split(',');
-    //console.log("api keys: ", keys);
+    //common.log("api keys: ", keys);
     return keys;
 }
 
@@ -36,13 +36,13 @@ function formApiUrl(restOfApiUrl) {
 function getApiObject() {
     const api_key = finnhub.ApiClient.instance.authentications['api_key'];
     const key = getRandomApi();
-    //console.log(key);
+    //common.log(key);
     api_key.apiKey = key;
     return new finnhub.DefaultApi();
 }
 
 async function getStockCurrentRate(stockSymbol) {
-    common.log("/api/getStockCurrentRate", "stockSymbol:" + stockSymbol);
+    common.log("", "/api/getStockCurrentRate", "stockSymbol:" + stockSymbol);
     if (!stockSymbol) {
         return null;
     }
@@ -56,7 +56,7 @@ async function getStockCurrentRate(stockSymbol) {
     }).then(resp => {
         return resp;
     }).catch(err => {
-        common.log("/api/getRateForWatchList: err -> ", err.message);
+        common.log("", "/api/getRateForWatchList: err -> ", err.message);
     });
     return common.isValidQuote(data) ? data : null;
 }
@@ -78,7 +78,7 @@ async function getRateForWatchList(watchList) {
     })).then(resp => {
         return resp;
     }).catch(err => {
-        common.log("/api/getRateForWatchList: err -> ", err.message);
+        common.log("", "/api/getRateForWatchList: err -> ", err.message);
     });
     return contents;
 }
@@ -87,27 +87,27 @@ async function getRateForWatchList(watchList) {
 
 
 async function search(searchText) {
-    common.log("/api/search: ", apiUrl);
+    common.log("", "/api/search: ", apiUrl);
     const apiUrl = formSandboxApiUrl("/search?q=" + searchText.toUpperCase());
-    //common.log("getDataForSymbol: ", apiUrl);
+    //common.log("", "getDataForSymbol: ", apiUrl);
     try {
         const responseData = await axios.get(apiUrl);
-        //common.log("getDataForSymbol: ", responseData.data);
+        //common.log("", "getDataForSymbol: ", responseData.data);
 
         return responseData.data;
     } catch (error) {
-        common.log("/api/serach/", error);
+        common.log("", "/api/serach/", error);
     }
 }
 
 async function marketNews() {
     const apiUrl = formApiUrl("/news?category=general");
-    common.log("/api/marketNews: ", apiUrl);
+    common.log("", "/api/marketNews: ", apiUrl);
     try {
         const responseData = await axios.get(apiUrl);
         return responseData.data;
     } catch (error) {
-        common.log("/api/marketNews/", error);
+        common.log("", "/api/marketNews/", error);
     }
 }
 
@@ -116,12 +116,12 @@ async function companyNews(symbol, fromDate, toDate) {
         return;
     }
     const apiUrl = formApiUrl("/company-news?symbol=" + symbol + "&from=" + fromDate + "&to=" + toDate);
-    common.log("/api/companyNews: ", apiUrl);
+    common.log("", "/api/companyNews: ", apiUrl);
     try {
         const responseData = await axios.get(apiUrl);
         return responseData.data;
     } catch (error) {
-        common.log("/api/companyNews/", error);
+        common.log("", "/api/companyNews/", error);
     }
 }
 
@@ -130,12 +130,12 @@ async function recommendationTrends(symbol) {
         return;
     }
     const apiUrl = formSandboxApiUrl("/stock/recommendation?symbol=" + symbol);
-    common.log("/api/recommendationTrends: ", apiUrl);
+    common.log("", "/api/recommendationTrends: ", apiUrl);
     try {
         const responseData = await axios.get(apiUrl);
         return responseData.data;
     } catch (error) {
-        common.log("/api/recommendationTrends/", error);
+        common.log("", "/api/recommendationTrends/", error);
     }
 }
 
@@ -145,12 +145,12 @@ async function basicFinancials(symbol) {
         return;
     }
     const apiUrl = formSandboxApiUrl("/stock/metric?symbol=" + symbol + "&metric=all");
-    common.log("/api/basicFinancials: ", apiUrl);
+    common.log("", "/api/basicFinancials: ", apiUrl);
     try {
         const responseData = await axios.get(apiUrl);
         return responseData.data;
     } catch (error) {
-        common.log("/api/basicFinancials/", error);
+        common.log("", "/api/basicFinancials/", error);
     }
 }
 
@@ -159,12 +159,12 @@ async function secFilings(symbol) {
         return;
     }
     const apiUrl = formSandboxApiUrl("/stock/filings?symbol=" + symbol);
-    common.log("/api/secFilings: ", apiUrl);
+    common.log("", "/api/secFilings: ", apiUrl);
     try {
         const responseData = await axios.get(apiUrl);
         return responseData.data;
     } catch (error) {
-        common.log("/api/secFilings/", error);
+        common.log("", "/api/secFilings/", error);
     }
 }
 

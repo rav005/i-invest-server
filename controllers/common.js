@@ -4,9 +4,12 @@ const db = require('../services/db');
 
 const User = require('../models/user');
 
-function log(path, msg) {
-    if (process.env.LOGGER) {
-        console.log(path, msg);
+function log(userId, path, msg) {
+    if (userId && userId.length > 0 && process.env.LOGGER) {
+        console.log("user id: " + userId + " path: " + path, msg);
+    }
+    else {
+        console.log("path: " + path, msg);
     }
 }
 

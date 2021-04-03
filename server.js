@@ -48,7 +48,7 @@ app.use(function (req, resp, next) {
 
         const userId = common.verifyJwt(token);
         if (userId) {
-            common.log("middleware", "userId valid: " + userId);
+            common.log(userId, "middleware", "userId valid: " + userId);
             resp.locals.userId = userId;
         }
         else {
@@ -72,7 +72,7 @@ app.use('/stock', stockRoutes);
 app.use('/transaction', transactionRoutes);
 
 app.get('/status', (req, resp) => {
-    common.log("/status", "code: 200");
+    common.log("", "/status", "code: 200");
     resp.status(200).send();
 });
 
@@ -83,5 +83,5 @@ cron.schedule('*/5 * * * *', function () {
 
 // Start listening to server
 app.listen(PORT, () => {
-    console.log('server is running on port: ' + PORT);
+    common.log("", 'server is running on port: ' + PORT);
 });
