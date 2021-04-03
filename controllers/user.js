@@ -22,9 +22,9 @@ router.post('/login', async (req, resp) => {
             //console.log('valid password:', isMatch);
             const token = common.generateAccessToken({ id: user._id });
             //console.log(user.watchList);
-            var watchList = await api.getRateForWatchList(user.watchList);
+            //var watchList = await api.getRateForWatchList(user.watchList);
             //console.log("==>", watchList);
-            resp.status(200).json({ token: token, watchList: watchList });
+            resp.status(200).json({ token: token });
         });
     }
     else {

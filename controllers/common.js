@@ -42,7 +42,7 @@ function verifyJwt(token) {
             const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
             return decoded.id;
         } catch (error) {
-            console.log('jwt token error: ', error);
+            console.log('jwt token error: ', error.message);
             return null;
         }
     }

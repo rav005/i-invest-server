@@ -37,7 +37,7 @@ app.use(function (req, res, next) {
 
 app.use(function (req, resp, next) {
     const url = req.url;
-    if (!url.includes("/user/") && !url.includes("/status")) {
+    if (!url.includes("/user/") && !url.includes("/status") && !url.includes("/getStocksfile")) {
         var token = req.headers.authorization;
 
         if (token && token.includes("Bearer ")) {

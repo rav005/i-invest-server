@@ -7,6 +7,27 @@ const db = require('../services/db');
 const common = require('./common');
 const api = require('./api');
 
+router.get('/getWatchlist', async (req, resp) => {
+    common.log("/getWatchlist", "req: " + JSON.stringify(req.body));
+
+    const userId = common.extractUserIdFromResponseLocals(resp);
+    if (userId) {
+        var user = await common.findUserById(userId);
+        if (user) {
+            common.log("/getWatchlist", "watchList: " + user.watchList);
+            var watchList = await api.getRateForWatchList(user.watchList);
+            resp.status(200).json({ watchList: watchList });
+        }
+        else {
+            resp.status(404).json({ "message": "invalid user" });
+        }
+    }
+    else {
+        common.log("/getWatchlist", "error");
+        resp.status(400).json({ "message": "invalid userid" });
+    }
+});
+
 router.post('/quote', async (req, resp) => {
     common.log("/main/quote", "req: " + JSON.stringify(req.body));
 
