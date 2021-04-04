@@ -102,7 +102,7 @@ router.post('/basicFinancials', async (req, resp) => {
         const respData = await api.basicFinancials(symbol);
         if (respData) {
             common.log(userId, "/main/basicFinancials: ", JSON.stringify(respData));
-            resp.status(200).json(respData);
+            resp.status(200).json(respData.metric);
         }
         else {
             common.log(userId, "/main/basicFinancials: err", JSON.stringify(respData));
