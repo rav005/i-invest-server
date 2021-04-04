@@ -161,10 +161,9 @@ router.post('/addToWatchlist', async (req, resp) => {
         var user = await common.findUserById(userId);
 
         const hasSymbol = user.watchList.find(value => value.symbol === symbol);
-        //common.log(userId,"/addToWatchlist", user.watchList);
         if (hasSymbol) {
             common.log(userId, "/addToWatchlist", "symbol exists");
-            resp.status(400).json({ "message": "symbol exists" });
+            resp.status(200).json({ "message": "symbol exists" });
         } else {
             //common.log(userId,"/addToWatchlist", "user: " + JSON.stringify(user));
             user.watchList.push({ name: stockName, symbol: symbol });
