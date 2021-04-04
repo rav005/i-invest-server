@@ -83,9 +83,6 @@ async function getRateForWatchList(watchList) {
     return contents;
 }
 
-
-
-
 async function search(searchText) {
     common.log("", "/api/search: ", apiUrl);
     const apiUrl = formSandboxApiUrl("/search?q=" + searchText.toUpperCase());
@@ -129,7 +126,7 @@ async function recommendationTrends(symbol) {
     if (!symbol) {
         return;
     }
-    const apiUrl = formSandboxApiUrl("/stock/recommendation?symbol=" + symbol);
+    const apiUrl = formApiUrl("/stock/recommendation?symbol=" + symbol);
     common.log("", "/api/recommendationTrends: ", apiUrl);
     try {
         const responseData = await axios.get(apiUrl);
@@ -144,7 +141,7 @@ async function basicFinancials(symbol) {
     if (!symbol) {
         return;
     }
-    const apiUrl = formSandboxApiUrl("/stock/metric?symbol=" + symbol + "&metric=all");
+    const apiUrl = formApiUrl("/stock/metric?symbol=" + symbol + "&metric=all");
     common.log("", "/api/basicFinancials: ", apiUrl);
     try {
         const responseData = await axios.get(apiUrl);
