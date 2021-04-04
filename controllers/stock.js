@@ -81,24 +81,20 @@ router.post('/recommendationTrends', async (req, resp) => {
         const respData = await api.recommendationTrends(symbol);
         if (respData) {
 
-            const months = 6
+            const months = 6;
             const data = respData.slice(0, months);
             console.log(data);
 
             var responseData = [];
-            responseData.push(['Buy', 'Hold', 'Sell', 'Strong buy', 'Strong sell']);
-
-            var dataArr = [];
-
+            responseData.push(['Period', 'Buy', 'Hold', 'Sell', 'Strong buy', 'Strong sell', { role: 'annotation' }]);
             data.forEach(x => {
-                dataArr.push([x.period, x.buy, x.hold, x.sell, x.strongBuy, x.strongSell]);
+                responseData.push([x.period, x.buy, x.hold, x.sell, x.strongBuy, x.strongSell, '']);
             });
 
-            responseData.push(dataArr);
 
             common.log(userId, "/main/recommendationTrends: ", JSON.stringify(responseData));
 
-            resp.status(200).json(data);
+            resp.status(200).json(responseData);
         }
         else {
             common.log(userId, "/main/recommendationTrends: err", JSON.stringify(respData));
