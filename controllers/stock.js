@@ -88,7 +88,8 @@ router.post('/recommendationTrends', async (req, resp) => {
             var responseData = [];
             responseData.push(['Period', 'Buy', 'Hold', 'Sell', 'Strong buy', 'Strong sell', { role: 'annotation' }]);
             data.forEach(x => {
-                responseData.push([x.period, x.buy, x.hold, x.sell, x.strongBuy, x.strongSell, '']);
+                var res = x.period.split("-");
+                responseData.push([res[0] + "/" + res[1], x.buy, x.hold, x.sell, x.strongBuy, x.strongSell, '']);
             });
 
 
