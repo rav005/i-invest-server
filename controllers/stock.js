@@ -81,7 +81,9 @@ router.post('/recommendationTrends', async (req, resp) => {
         const respData = await api.recommendationTrends(symbol);
         if (respData) {
             common.log(userId, "/main/recommendationTrends: ", JSON.stringify(respData));
-            resp.status(200).json(respData);
+            const months = 6
+            const data = respData.slice(0, months);
+            resp.status(200).json(data);
         }
         else {
             common.log(userId, "/main/recommendationTrends: err", JSON.stringify(respData));
@@ -101,7 +103,7 @@ router.post('/basicFinancials', async (req, resp) => {
     if (symbol) {
         const respData = await api.basicFinancials(symbol);
         if (respData) {
-            common.log(userId, "/main/basicFinancials: ", JSON.stringify(respData));
+            common.log(userId, "/main/basicFinancials: ", JSON.stringify(respData.metric));
             resp.status(200).json(respData.metric);
         }
         else {
