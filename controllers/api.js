@@ -33,9 +33,9 @@ function formApiUrl(restOfApiUrl) {
     return process.env.API_URL + restOfApiUrl + "&token=" + getRandomApi();
 }
 
-function getApiObject() {
+function getSandboxApiObject() {
     const api_key = finnhub.ApiClient.instance.authentications['api_key'];
-    const key = getRandomApi();
+    const key = getSandboxRandomApi();
     //common.log(key);
     api_key.apiKey = key;
     return new finnhub.DefaultApi();
@@ -47,7 +47,7 @@ async function getStockCurrentRate(stockSymbol) {
         return null;
     }
     const data = await new Promise((resolve, reject) => {
-        getApiObject().quote(stockSymbol, (error, data, response) => {
+        getSandboxApiObject().quote(stockSymbol, (error, data, response) => {
             if (error) {
                 return reject(error);
             }
@@ -56,7 +56,7 @@ async function getStockCurrentRate(stockSymbol) {
     }).then(resp => {
         return resp;
     }).catch(err => {
-        common.log("", "/api/getRateForWatchList: err -> ", err.message);
+        common.log("", "/api/getStockCurrentRate: err -> ", err);
     });
     return common.isValidQuote(data) ? data : null;
 }
@@ -67,7 +67,7 @@ async function getRateForWatchList(watchList) {
     }
     const contents = await Promise.all(watchList.map(async (stock) => {
         return new Promise((resolve, reject) => {
-            getApiObject().quote(stock.symbol, (error, data, response) => {
+            getSandboxApiObject().quote(stock.symbol, (error, data, response) => {
                 if (error) {
                     return reject(error);
                 }

@@ -57,6 +57,9 @@ function extractUserIdFromResponseLocals(resp) {
 }
 
 function isValidQuote(json) {
+    if (!json) {
+        return false;
+    }
     const isZero = (currentValue) => currentValue == 0;
     return !Object.values(json).every(isZero);
 }
