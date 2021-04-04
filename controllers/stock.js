@@ -36,11 +36,11 @@ router.post('/quote', async (req, resp) => {
     if (symbol) {
         const respData = await api.getStockCurrentRate(symbol);
         if (respData) {
-            common.log(userId, "/main/quote: ", respData);
+            common.log(userId, "/main/quote: ", JSON.stringify(respData));
             resp.status(200).json(respData);
         }
         else {
-            common.log(userId, "/main/quote: err", respData);
+            common.log(userId, "/main/quote: err", JSON.stringify(respData));
             resp.status(400).send();
         }
     }
@@ -59,11 +59,11 @@ router.post('/companyNews', async (req, resp) => {
     if (symbol && fromDate && toDate) {
         const respData = await api.companyNews(symbol, fromDate, toDate);
         if (respData) {
-            common.log(userId, "/main/companyNews: ", respData);
+            common.log(userId, "/main/companyNews: ", JSON.stringify(respData));
             resp.status(200).json(respData);
         }
         else {
-            common.log(userId, "/main/companyNews: err", respData);
+            common.log(userId, "/main/companyNews: err", JSON.stringify(respData));
             resp.status(400).send();
         }
     }
@@ -80,11 +80,11 @@ router.post('/recommendationTrends', async (req, resp) => {
     if (symbol) {
         const respData = await api.recommendationTrends(symbol);
         if (respData) {
-            common.log(userId, "/main/recommendationTrends: ", respData);
+            common.log(userId, "/main/recommendationTrends: ", JSON.stringify(respData));
             resp.status(200).json(respData);
         }
         else {
-            common.log(userId, "/main/recommendationTrends: err", respData);
+            common.log(userId, "/main/recommendationTrends: err", JSON.stringify(respData));
             resp.status(400).send();
         }
     }
@@ -101,11 +101,11 @@ router.post('/basicFinancials', async (req, resp) => {
     if (symbol) {
         const respData = await api.basicFinancials(symbol);
         if (respData) {
-            common.log(userId, "/main/basicFinancials: ", respData);
+            common.log(userId, "/main/basicFinancials: ", JSON.stringify(respData));
             resp.status(200).json(respData);
         }
         else {
-            common.log(userId, "/main/basicFinancials: err", respData);
+            common.log(userId, "/main/basicFinancials: err", JSON.stringify(respData));
             resp.status(400).send();
         }
     }
@@ -123,11 +123,11 @@ router.post('/secFilings', async (req, resp) => {
     if (symbol) {
         const respData = await api.secFilings(symbol);
         if (respData) {
-            common.log(userId, "/main/secFilings: ", respData);
+            common.log(userId, "/main/secFilings: ", JSON.stringify(respData));
             resp.status(200).json(respData);
         }
         else {
-            common.log(userId, "/main/secFilings: err", respData);
+            common.log(userId, "/main/secFilings: err", JSON.stringify(respData));
             resp.status(400).send();
         }
     }
@@ -156,7 +156,7 @@ router.post('/addToWatchlist', async (req, resp) => {
             user.watchList.push({ name: stockName, symbol: symbol });
             user.save(error => {
                 if (common.checkServerError(resp, error)) {
-                    console.log(userId, "/addToWatchlist err: ", error, ", req: ", req.body);
+                    common.log(userId, "/addToWatchlist err: ", error, ", req: ", req.body);
                     return;
                 }
                 resp.status(201).send();
@@ -180,7 +180,7 @@ router.post('/removeFromWatchlist', async (req, resp) => {
         user.watchList = user.watchList.filter(value => value.symbol !== symbol);
         user.save(error => {
             if (common.checkServerError(resp, error)) {
-                console.log(userId, "/removeFromWatchlist err: ", error, ", req: ", req.body);
+                common.log(userId, "/removeFromWatchlist err: ", error, ", req: ", req.body);
                 return;
             }
             resp.status(200).json({ "message": "symbol removed from watchlist" });
@@ -205,12 +205,12 @@ router.post('/buyStock', async (req, resp) => {
 
     stock.save(error => {
         if (common.checkServerError(resp, error)) {
-            console.log(userId, "/stock/buyStock err: ", error, ", req: ", req.body);
+            common.log(userId, "/stock/buyStock err: ", error, ", req: ", JSON.stringify(req.body));
             return;
         }
 
         resp.status(201).json({ "stock": stock });
-        console.log(userId, 'stock created successfully!');
+        common.log(userId, 'stock created successfully!');
     });
 });
 
