@@ -86,3 +86,11 @@ cron.schedule('*/5 * * * *', function () {
 app.listen(PORT, () => {
     common.log("", 'server is running on port: ', PORT);
 });
+
+process.on('uncaughtException', function (err) {
+    console.log("uncaughtException");
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.log("uncaughtException");
+})
