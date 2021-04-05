@@ -88,9 +88,9 @@ app.listen(PORT, () => {
 });
 
 process.on('uncaughtException', function (err) {
-    console.log("uncaughtException");
+    console.log("uncaughtException: ", new Date());
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.log("uncaughtException");
+    console.log("uncaughtException: ", new Date());
 })
