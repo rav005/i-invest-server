@@ -3,6 +3,7 @@ const finnhub = require('finnhub');
 const axios = require('axios');
 const common = require('../controllers/common');
 
+// finn hub sandbox
 function getAllSandboxAPIkey() {
     const keys = process.env.SANDBOX_API_KEY.split(',');
     //common.log("api keys: ", keys);
@@ -18,6 +19,7 @@ function formSandboxApiUrl(restOfApiUrl) {
     return process.env.API_URL + restOfApiUrl + "&token=" + getSandboxRandomApi();
 }
 
+// finn hub api
 function getAllAPIkey() {
     const keys = process.env.API_KEY.split(',');
     //common.log("api keys: ", keys);
@@ -31,6 +33,22 @@ function getRandomApi() {
 
 function formApiUrl(restOfApiUrl) {
     return process.env.API_URL + restOfApiUrl + "&token=" + getRandomApi();
+}
+
+// market stack
+function getAllHistoricalDataAPIkey() {
+    const keys = process.env.HISTORICAL_API.split(',');
+    //common.log("api keys: ", keys);
+    return keys;
+}
+
+function getRandomHistoricalDataApi() {
+    const keys = getAllHistoricalDataAPIkey();
+    return keys[Math.floor(Math.random() * (keys.length - 1)) + 0];
+}
+
+function formHistoricalDataApiUrl(symbol) {
+    return process.env.HISTORICAL_API_URL + "/eod?" + "&access_key=" + getRandomHistoricalDataApi() + "&symbols=" + symbol;
 }
 
 function getSandboxApiObject() {
@@ -165,6 +183,20 @@ async function secFilings(symbol) {
     }
 }
 
+async function historicalData(symbol) {
+    if (!symbol) {
+        return;
+    }
+    const apiUrl = formHistoricalDataApiUrl(symbol);
+    common.log("", "/api/historicalData: ", apiUrl);
+    try {
+        const responseData = await axios.get(apiUrl);
+        return responseData.data;
+    } catch (error) {
+        common.log("", "/api/historicalData: ", error);
+    }
+}
+
 module.exports = {
     getStockCurrentRate,
     getRateForWatchList,
@@ -173,5 +205,6 @@ module.exports = {
     companyNews,
     recommendationTrends,
     basicFinancials,
-    secFilings
+    secFilings,
+    historicalData
 };
