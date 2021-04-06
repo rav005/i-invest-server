@@ -77,15 +77,14 @@ router.post('/passwordchange', async (req, resp) => {
             if (id) {
                 db.connect();
                 const user = await User.updateOne({ _id: id }, { password: newPasswordHash });
-                const token = common.generateAccessToken({ id: user._id });
-                resp.status(200).json({ token: token });
+                resp.status(200).send();
             }
             else {
-                resp.status(400).send();
+                resp.status(400).json({ message: "invalid token" });
             }
         }
         else {
-            resp.status(400).send();
+            resp.status(400).json({ message: "token/password required" });
         }
     } catch (err) {
         resp.status(500).send();
