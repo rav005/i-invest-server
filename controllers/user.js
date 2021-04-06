@@ -91,6 +91,32 @@ router.post('/passwordchange', async (req, resp) => {
     }
 });
 
+router.post('/securityQuestionAnswerChange', async (req, resp) => {
+    try {
+        const question = req.body.question;
+        const answer = req.body.answer;
+        const token = req.body.token;
+
+        const newAnswerHash = await User.getHash(answer);
+        if (token && question && newAnswerHash) {
+            const id = common.verifyJwt(token);
+            if (id) {
+                db.connect();
+                const user = await User.updateOne({ _id: id }, { question: question, answer: newAnswerHash });
+                resp.status(200).send();
+            }
+            else {
+                resp.status(400).json({ message: "invalid token" });
+            }
+        }
+        else {
+            resp.status(400).json({ message: "token/question/answer required" });
+        }
+    } catch (err) {
+        resp.status(500).send();
+    }
+});
+
 router.post('/signup', async (req, resp) => {
     try {
         const user = new User(req.body);
