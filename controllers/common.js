@@ -21,17 +21,25 @@ function checkServerError(res, error) {
 }
 
 async function findUserByUsername(username) {
-    db.connect();
-    const user = await User.findOne({ username: username });
-    //db.disconnect();
-    return user;
+    try {
+        db.connect();
+        const user = await User.findOne({ username: username });
+        //db.disconnect();
+        return user;
+    } catch (error) {
+        common.log("", "common/findUserByUsername", "unexpected error" + new Date(+ " " + JSON.stringify(error)));
+    }
 }
 
 async function findUserById(id) {
-    db.connect();
-    const user = await User.findOne({ _id: id });
-    //db.disconnect();
-    return user;
+    try {
+        db.connect();
+        const user = await User.findOne({ _id: id });
+        //db.disconnect();
+        return user;
+    } catch (error) {
+        common.log("", "common/findUserById", "unexpected error" + new Date() + " " + JSON.stringify(error));
+    }
 }
 
 function generateAccessToken(username, expiry = "18000s") {
@@ -45,7 +53,8 @@ function verifyJwt(token) {
             const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
             return decoded.id;
         } catch (error) {
-            console.log('jwt token error: ', error.message);
+            common.log("", "common/findUserById", "jwt token error" + new Date() + " " + JSON.stringify(error));
+
             return null;
         }
     }
@@ -53,39 +62,59 @@ function verifyJwt(token) {
 }
 
 function extractUserIdFromResponseLocals(resp) {
-    return resp.locals.userId;
+    try {
+        return resp.locals.userId;
+    } catch (error) {
+        common.log("", "common/extractUserIdFromResponseLocals", "unexpected error" + new Date() + " " + JSON.stringify(error));
+    }
 }
 
 function isValidQuote(json) {
-    if (!json) {
-        return false;
+    try {
+        if (!json) {
+            return false;
+        }
+        const isZero = (currentValue) => currentValue == 0;
+        return !Object.values(json).every(isZero);
+    } catch (error) {
+        common.log("", "common/isValidQuote", "unexpected error" + new Date() + " " + JSON.stringify(error));
     }
-    const isZero = (currentValue) => currentValue == 0;
-    return !Object.values(json).every(isZero);
 }
 
 function formatDate(date) {
-    var d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
+    try {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
 
-    if (month.length < 2)
-        month = '0' + month;
-    if (day.length < 2)
-        day = '0' + day;
+        if (month.length < 2)
+            month = '0' + month;
+        if (day.length < 2)
+            day = '0' + day;
 
-    return [year, month, day].join('-');
+        return [year, month, day].join('-');
+    } catch (error) {
+        common.log("", "common/formatDate", "unexpected error" + new Date() + " " + JSON.stringify(error));
+    }
 }
 
 function getFromDate() {
-    var d = new Date();
-    d.setDate(d.getDate() - 21);
-    return formatDate(d);
+    try {
+        var d = new Date();
+        d.setDate(d.getDate() - 21);
+        return formatDate(d);
+    } catch (error) {
+        common.log("", "common/getFromDate", "unexpected error" + new Date() + " " + JSON.stringify(error));
+    }
 }
 
 function getToDate() {
-    return formatDate(new Date());
+    try {
+        return formatDate(new Date());
+    } catch (error) {
+        common.log("", "common/getToDate", "unexpected error" + new Date() + " " + JSON.stringify(error));
+    }
 }
 
 module.exports = {

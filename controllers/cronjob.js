@@ -5,7 +5,11 @@ const db = require('../services/db');
 const User = require('../models/user');
 
 function transaction() {
-    common.log("", "cronjob/transaction", "running a task: " + new Date());
+    try {
+        common.log("", "cronjob/transaction", "running a task: " + new Date());
+    } catch (error) {
+        common.log("", "cronjob/transaction", "unexpected error" + new Date() + " " + JSON.stringify(error));
+    }
 }
 
 module.exports = {
