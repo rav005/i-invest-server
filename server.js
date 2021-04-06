@@ -11,6 +11,7 @@ const userRoutes = require('./controllers/user');
 const accountRoutes = require('./controllers/account');
 const stockRoutes = require('./controllers/stock');
 const transactionRoutes = require('./controllers/transaction');
+const { JsonWebTokenError } = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -88,9 +89,9 @@ app.listen(PORT, () => {
 });
 
 process.on('uncaughtException', function (err) {
-    console.log("uncaughtException: ", new Date());
+    common.log("", "An unexpected error occurred", "uncaughtException: " + new Date());
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.log("uncaughtException: ", new Date());
+    common.log("", "An unexpected error occurred", "uncaughtException: " + new Date());
 })
