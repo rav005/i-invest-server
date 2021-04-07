@@ -73,27 +73,16 @@ router.get('/forex', async (req, resp) => {
         const from = req.body.from;
         const to = req.body.to;
         if (from && to) {
-
-            try {
-                apiUrl = "https://api.ratesapi.io/api/latest?base=" + from.toUpperCase() + "&symbols=" + to.toUpperCase();
-                const responseData = await axios.get(apiUrl);
-                if (responseData.status == 200) {
-                    const rate = responseData.data.rates[to];
-                    common.log("", "/main/forex", "rate:" + JSON.stringify(responseData.data));
-                    resp.status(200).json({ "rate": rate });
-                }
-                else {
-                    resp.status(400).send();
-                }
-            } catch (err) {
-                common.log("", "/main/forex", "err:" + err);
-                resp.status(400).send();
-            }
+            const rate = await api.forex(from, to);
+            const twoDecimal = Math.round(rate * 100) / 100
+            common.log("", "/main/forex", "rate:" + twoDecimal);
+            resp.status(200).json({ "rate": twoDecimal });
         }
         else {
             resp.status(400).json({ "message": "from currency and to currency request params required" });
         }
     } catch (err) {
+        common.log("", "/main/forex", "err:" + err);
         resp.status(500).send();
     }
 });
