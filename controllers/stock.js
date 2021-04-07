@@ -184,6 +184,7 @@ router.post('/addToWatchlist', async (req, resp) => {
 
         const stockName = req.body.stockName;
         const symbol = req.body.symbol.toUpperCase();
+        const currency = req.body.currency.toUpperCase();
         if (userId && stockName && symbol) {
 
             var user = await common.findUserById(userId);
@@ -194,7 +195,7 @@ router.post('/addToWatchlist', async (req, resp) => {
                 resp.status(200).json({ "message": "symbol exists" });
             } else {
                 //common.log(userId,"/addToWatchlist", "user: " + JSON.stringify(user));
-                user.watchList.push({ name: stockName, symbol: symbol });
+                user.watchList.push({ name: stockName, symbol: symbol, currency: currency });
                 user.save(error => {
                     if (common.checkServerError(resp, error)) {
                         common.log(userId, "/addToWatchlist err: ", error, ", req: ", req.body);

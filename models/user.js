@@ -7,7 +7,8 @@ const watchListType = new mongoose.Schema({
   symbol: {
     type: String,
     uppercase: true
-  }
+  },
+  currency: String
 });
 
 const UserSchema = mongoose.Schema({
@@ -69,14 +70,14 @@ UserSchema.pre('save', function (next) {
   });
 });
 
-UserSchema.methods.comparePassword = function (candidatePassword,  cb) {
+UserSchema.methods.comparePassword = function (candidatePassword, cb) {
   bcrypt.compare(candidatePassword, this.password, function (err, isMatch) {
     if (err) return cb(err);
     cb(null, isMatch);
   });
 };
 
-UserSchema.methods.compareAnswer = function (answer,  cb) {
+UserSchema.methods.compareAnswer = function (answer, cb) {
   bcrypt.compare(answer, this.answer, function (err, isMatch) {
     if (err) return cb(err);
     cb(null, isMatch);
