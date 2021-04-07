@@ -68,29 +68,35 @@ router.post('/passwordresetquestion', async (req, resp) => {
 
 router.post('/passwordChange', async (req, resp) => {
     try {
+        const type = req.body.type;
         const currentPassword = req.body.currentPassword;
         const newPassword = req.body.newPassword;
         const token = req.body.token;
 
         const newPasswordHash = await User.getHash(newPassword);
-        if (token && currentPassword && newPasswordHash) {
+        if (token && (type == "reset" || currentPassword) && newPasswordHash) {
             const id = common.verifyJwt(token);
             if (id) {
                 db.connect();
-                const user = await common.findUserById(id);
-                if (user) {
-                    user.comparePassword(currentPassword, async (err, isMatch) => {
-                        if (err || !isMatch) {
-                            resp.status(403).json({ message: "incorrect password" });
-                        }
-                        else {
-                            await User.updateOne({ _id: id }, { password: newPasswordHash });
-                            resp.status(200).send();
-                        }
-                    });
-                }
-                else {
-                    resp.status(403).json({ message: "user not found" });
+                if (type == "reset") {
+                    await User.updateOne({ _id: id }, { password: newPasswordHash });
+                    resp.status(200).json({ message: "password reset" });
+                } else {
+                    const user = await common.findUserById(id);
+                    if (user) {
+                        user.comparePassword(currentPassword, async (err, isMatch) => {
+                            if (err || !isMatch) {
+                                resp.status(403).json({ message: "incorrect password" });
+                            }
+                            else {
+                                await User.updateOne({ _id: id }, { password: newPasswordHash });
+                                resp.status(200).json({ message: "password changed" });
+                            }
+                        });
+                    }
+                    else {
+                        resp.status(403).json({ message: "user not found" });
+                    }
                 }
             }
             else {
