@@ -21,7 +21,7 @@ router.post('/login', async (req, resp) => {
             });
         }
         else {
-            resp.status(403).send();
+            resp.status(403).json({ message: "User not found" });
         }
     } catch (err) {
         resp.status(500).send();
@@ -36,7 +36,7 @@ router.post('/passwordreset', async (req, resp) => {
             resp.status(200).json({ "question": user.question });
         }
         else {
-            resp.status(404).send();
+            resp.status(403).json({ message: "User not found" });
         }
     } catch (err) {
         resp.status(500).send();
@@ -48,18 +48,18 @@ router.post('/passwordresetquestion', async (req, resp) => {
         const username = req.body.username;
         const user = await common.findUserByUsername(username);
         if (user) {
-
             user.compareAnswer(req.body.answer, (err, isMatch) => {
                 if (err || !isMatch) {
-                    resp.status(403).send();
-                    return;
+                    resp.status(403).json({ message: "Incorrect answer" });
                 }
-                const token = common.generateAccessToken({ id: user._id }, '120s');
-                resp.status(200).json({ token: token });
+                else {
+                    const token = common.generateAccessToken({ id: user._id }, '120s');
+                    resp.status(200).json({ token: token });
+                }
             });
         }
         else {
-            resp.status(403).send();
+            resp.status(403).json({ message: "User not found" });
         }
     } catch (err) {
         resp.status(500).send();
@@ -80,22 +80,22 @@ router.post('/passwordChange', async (req, resp) => {
                 db.connect();
                 if (type == "reset") {
                     await User.updateOne({ _id: id }, { password: newPasswordHash });
-                    resp.status(200).json({ message: "password reset" });
+                    resp.status(200).json({ message: "password reset!!!" });
                 } else {
                     const user = await common.findUserById(id);
                     if (user) {
                         user.comparePassword(currentPassword, async (err, isMatch) => {
                             if (err || !isMatch) {
-                                resp.status(403).json({ message: "incorrect password" });
+                                resp.status(403).json({ message: "Incorrect password" });
                             }
                             else {
                                 await User.updateOne({ _id: id }, { password: newPasswordHash });
-                                resp.status(200).json({ message: "password changed" });
+                                resp.status(200).json({ message: "password changed!!!" });
                             }
                         });
                     }
                     else {
-                        resp.status(403).json({ message: "user not found" });
+                        resp.status(403).json({ message: "User not found" });
                     }
                 }
             }
@@ -127,7 +127,7 @@ router.post('/securityQuestionAnswerChange', async (req, resp) => {
                 if (user) {
                     user.comparePassword(currentPassword, async (err, isMatch) => {
                         if (err || !isMatch) {
-                            resp.status(403).json({ message: "incorrect password" });
+                            resp.status(403).json({ message: "Incorrect password" });
                         }
                         else {
                             await User.updateOne({ _id: id }, { question: question, answer: newAnswerHash });
@@ -136,7 +136,7 @@ router.post('/securityQuestionAnswerChange', async (req, resp) => {
                     });
                 }
                 else {
-                    resp.status(403).json({ message: "user not found" });
+                    resp.status(403).json({ message: "User not found" });
                 }
             }
             else {
