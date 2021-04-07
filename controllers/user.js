@@ -66,25 +66,39 @@ router.post('/passwordresetquestion', async (req, resp) => {
     }
 });
 
-router.post('/passwordchange', async (req, resp) => {
+router.post('/passwordChange', async (req, resp) => {
     try {
-        const newPassword = req.body.password;
+        const currentPassword = req.body.currentPassword;
+        const newPassword = req.body.newPassword;
         const token = req.body.token;
 
         const newPasswordHash = await User.getHash(newPassword);
-        if (token && newPassword && newPasswordHash) {
+        if (token && currentPassword && newPasswordHash) {
             const id = common.verifyJwt(token);
             if (id) {
                 db.connect();
-                const user = await User.updateOne({ _id: id }, { password: newPasswordHash });
-                resp.status(200).send();
+                const user = await common.findUserById(id);
+                if (user) {
+                    user.comparePassword(currentPassword, async (err, isMatch) => {
+                        if (err || !isMatch) {
+                            resp.status(403).json({ message: "incorrect password" });
+                        }
+                        else {
+                            await User.updateOne({ _id: id }, { password: newPasswordHash });
+                            resp.status(200).send();
+                        }
+                    });
+                }
+                else {
+                    resp.status(403).json({ message: "user not found" });
+                }
             }
             else {
                 resp.status(400).json({ message: "invalid token" });
             }
         }
         else {
-            resp.status(400).json({ message: "token/password required" });
+            resp.status(400).json({ message: "token/current password/new password required" });
         }
     } catch (err) {
         resp.status(500).send();
@@ -93,28 +107,43 @@ router.post('/passwordchange', async (req, resp) => {
 
 router.post('/securityQuestionAnswerChange', async (req, resp) => {
     try {
+        const currentPassword = req.body.currentPassword;
         const question = req.body.question;
         const answer = req.body.answer;
         const token = req.body.token;
 
         const newAnswerHash = await User.getHash(answer);
-        if (token && question && newAnswerHash) {
+        if (token && currentPassword && question && newAnswerHash) {
             const id = common.verifyJwt(token);
             if (id) {
                 db.connect();
-                const user = await User.updateOne({ _id: id }, { question: question, answer: newAnswerHash });
-                resp.status(200).send();
+                const user = await common.findUserById(id);
+                if (user) {
+                    user.comparePassword(currentPassword, async (err, isMatch) => {
+                        if (err || !isMatch) {
+                            resp.status(403).json({ message: "incorrect password" });
+                        }
+                        else {
+                            await User.updateOne({ _id: id }, { question: question, answer: newAnswerHash });
+                            resp.status(200).send();
+                        }
+                    });
+                }
+                else {
+                    resp.status(403).json({ message: "user not found" });
+                }
             }
             else {
                 resp.status(400).json({ message: "invalid token" });
             }
         }
         else {
-            resp.status(400).json({ message: "token/question/answer required" });
+            resp.status(400).json({ message: "token/current password/question/answer required" });
         }
     } catch (err) {
         resp.status(500).send();
     }
+
 });
 
 router.post('/signup', async (req, resp) => {
