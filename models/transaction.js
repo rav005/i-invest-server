@@ -2,26 +2,28 @@ const mongoose = require('mongoose');
 
 const TransactionSchema = mongoose.Schema({
     name: {
-        type: String,
-        required: true
+        type: String
     },
     stockSymbol: {
-        type: String,
-        required: true
+        type: String
     },
     quantity: {
-        type: String,
-        required: true
+        type: String
     },
     type: {
         type: String,
-        enum: ['buy', 'sell', 'debit', 'credit'],
+        enum: ['Market buy', 'Market sell', 'Limit buy', 'Limit sell', 'Initial deposit', 'Deposit', 'Withdraw'],
         required: true
     },
-    price: {
+    amount: {
         type: Number,
         required: true,
         min: [0, 'Balance cannot be below 0']
+    },
+    transactionDate: {
+        type: Date,
+        default: Date.now,
+        required: true
     },
     accountId: {
         type: String,

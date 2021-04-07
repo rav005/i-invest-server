@@ -1,22 +1,33 @@
 const express = require('express');
 const router = express.Router();
-const Account = require('../models/account');
+const Transaction = require('../models/transaction');
 const Stock = require('../models/stock');
 const jwt = require("jsonwebtoken");
 const db = require('../services/db');
 const common = require('./common');
 
-router.get('/getAllAccounts', async (req, resp) => {
-    const userId = common.extractUserIdFromResponseLocals(resp);
-    common.log(userId, "/getAllAccounts", "req: " + JSON.stringify(req.body));
+router.get('/getAllTransactions', async (req, resp) => {
+    try {
+        const userId = common.extractUserIdFromResponseLocals(resp);
+        common.log(userId, "/getAllTransaction", "req: " + JSON.stringify(req.body));
 
-    db.connect();
-    const accounts = await Account.find({ userId: userId });
-    common.log(userId, "/getAllAccounts", "accounts: " + accounts);
-    resp.status(200).json({ "accounts": accounts });
+        const accountId = req.body.accountId;
+        if (accountId) {
+            db.connect();
+            const transactions = await Transaction.find({ accountId: accountId });
+            common.log(userId, "/getAllTransaction", "transactions: " + transactions);
+            resp.status(200).json({ "accounts": transactions });
+        }
+        else {
+            // only if req.body does not have account id
+            resp.status(400).json({ message: "account id required" });
+        }
+    } catch (err) {
+        resp.status(500).send();
+    }
 });
 
-router.post('/getAccount', async (req, resp) => {
+router.post('/getTransaction', async (req, resp) => {
     const userId = common.extractUserIdFromResponseLocals(resp);
     common.log(userId, "/getAccount", "req: " + JSON.stringify(req.body));
     const accountId = req.body.accountId;
@@ -35,11 +46,13 @@ router.post('/getAccount', async (req, resp) => {
         }
 
     }
-    // only if req.body does not have account id
-    resp.status(404).send();
+    else {
+        // only if req.body does not have account id
+        resp.status(404).send();
+    }
 });
 
-router.post('/addAccount', async (req, resp) => {
+router.post('/addTransaction', async (req, resp) => {
     const userId = common.extractUserIdFromResponseLocals(resp);
     common.log(userId, "/getAllAccounts", "req: " + JSON.stringify(req.body));
 
@@ -60,7 +73,7 @@ router.post('/addAccount', async (req, resp) => {
     });
 });
 
-router.post('/deleteAccount', async (req, resp) => {
+router.post('/deleteTransaction', async (req, resp) => {
     const userId = common.extractUserIdFromResponseLocals(resp);
     common.log(userId, "/deleteAccount", "req: " + JSON.stringify(req.body));
     const accountId = req.body.accountId;

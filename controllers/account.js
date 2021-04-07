@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Account = require('../models/account');
+const Transaction = require('../models/transaction');
 const Stock = require('../models/stock');
 const jwt = require("jsonwebtoken");
 const db = require('../services/db');
@@ -63,7 +64,18 @@ router.post('/addAccount', async (req, resp) => {
                 common.log(userId, "/account/addAccount err: ", error, ", req: ", JSON.stringify(req.body));
                 return;
             }
+            var transaction = new Transaction();
+            transaction.type = "Initial deposit";
+            transaction.amount = account.balance;
+            transaction.accountId = account._id;
 
+            transaction.save(error => {
+                if (common.checkServerError(resp, error)) {
+                    common.log(userId, "/account/addAccount err: ", error, ", req: ", JSON.stringify(req.body));
+                    return;
+                }
+                common.log(userId, "/account/addAccount", 'transaction created successfully!');
+            });
             resp.status(201).json({ "account": account });
             common.log(userId, "/account/addAccount", 'account created successfully!');
         });
@@ -103,6 +115,8 @@ router.post('/newBalance', async (req, resp) => {
 
         const accountId = req.body.accountId;
         const newBalance = req.body.newBalance;
+        const prevBalance = req.body.prevBalance;
+        const transactionType = req.body.transactionType;
 
         if (accountId && newBalance) {
 
@@ -110,21 +124,40 @@ router.post('/newBalance', async (req, resp) => {
                 db.connect();
                 const dbUpdateResponse = await Account.updateOne({ _id: accountId, userId: userId }, { balance: newBalance });
 
+                var transaction = new Transaction();
+                transaction.type = transactionType;
+                if (transactionType == "Deposit") {
+                    transaction.amount = newBalance - prevBalance;
+                }
+                else {
+                    transaction.amount = prevBalance - newBalance;
+                }
+                transaction.accountId = accountId;
+
+                transaction.save(error => {
+                    if (common.checkServerError(resp, error)) {
+                        common.log(userId, "/account/newBalance err: ", error, ", req: ", JSON.stringify(req.body));
+                        return;
+                    }
+                    common.log(userId, "/account/newBalance", 'transaction created successfully!');
+                });
+
+
                 if (dbUpdateResponse && dbUpdateResponse.n == 1) {
-                    common.log(userId, "/newBalance", "updated balance");
+                    common.log(userId, "/account/newBalance", "updated balance");
                     resp.status(200).send();
                 }
                 else {
-                    common.log(userId, "/newBalance", "userid/account not found");
+                    common.log(userId, "/account/newBalance", "userid/account not found");
                     resp.status(400).send();
                 }
             } catch (err) {
-                common.log(userId, "/newBalance", "err: " + JSON.stringify(err));
+                common.log(userId, "/account/newBalance", "err: " + JSON.stringify(err));
                 resp.status(400).send();
             }
         }
         else {
-            common.log(userId, "/newBalance", "accountId/new balance is invalid: " + JSON.stringify(req.body));
+            common.log(userId, "/account/newBalance", "accountId/new balance is invalid: " + JSON.stringify(req.body));
             resp.status(400).json({ "message": "accountId/new balance is invalid" });
         }
     } catch (err) {

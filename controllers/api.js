@@ -134,7 +134,7 @@ async function getRateForWatchList(watchList) {
                     if (error) {
                         return reject(error);
                     }
-                    var s = { name: stock.name, symbol: stock.symbol, data: data };
+                    var s = { name: stock.name, symbol: stock.symbol, currency: stock.currency, data: data };
                     return resolve(s);
                 });
             })

@@ -9,6 +9,10 @@ const StockSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    currency: {
+        type: String,
+        required: true
+    },
     quantity: {
         type: Number,
         required: true,
