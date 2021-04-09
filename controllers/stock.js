@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Account = require('../models/account');
+const Transaction = require('../models/transaction');
 const Stock = require('../models/stock');
 const jwt = require("jsonwebtoken");
 const db = require('../services/db');
@@ -244,25 +245,50 @@ router.post('/removeFromWatchlist', async (req, resp) => {
 router.post('/buyStock', async (req, resp) => {
     try {
         const userId = common.extractUserIdFromResponseLocals(resp);
-        common.log(userId, "/buyStock", "req: " + JSON.stringify(req.body));
+        common.log(userId, "/stock/buyStock", "req: " + JSON.stringify(req.body));
 
         var reqBody = req.body;
-        reqBody.userId = userId;
         const stock = new Stock(reqBody);
+        const accountId = reqBody.accountId;
 
         db.connect();
 
-        stock.save(error => {
-            if (common.checkServerError(resp, error)) {
-                common.log(userId, "/stock/buyStock err: ", error, ", req: ", JSON.stringify(req.body));
-                return;
-            }
+        const account = await Account.findOne({ _id: accountId });
+        const orderAmount = reqBody.buyPrice * reqBody.quantity;
+        const newBalance = account.balance - orderAmount;
+        await Account.updateOne({ _id: accountId }, { balance: newBalance });
 
-            resp.status(201).json({ "stock": stock });
-            common.log(userId, 'stock created successfully!');
+        var transaction = new Transaction();
+        transaction.name = reqBody.name;
+        transaction.stockSymbol = reqBody.symbol;
+        transaction.quantity = reqBody.quantity;
+        transaction.type = reqBody.type;
+        transaction.amount = orderAmount;
+        transaction.accountId = accountId;
+
+        await transaction.save(error => {
+            if (common.checkServerError(resp, error)) {
+                common.log(userId, "/stock/buyStock err: ", error, ", req: ", JSON.stringify(transaction));
+            }
+            else {
+                common.log(userId, "/stock/buyStock", 'transaction created successfully!');
+            }
+        });
+
+
+        await stock.save(error => {
+            if (common.checkServerError(resp, error)) {
+                common.log(userId, "/stock/buyStock err: ", error, ", req: ", JSON.stringify(stock));
+                resp.status(400).json({ success: false, message: "buy err" });
+            }
+            else {
+                resp.status(201).json({ success: true, message: "buy successful" });
+                common.log(userId, 'stock created successfully!', '');
+            }
         });
     } catch (err) {
-        resp.status(500).send();
+        common.log(userId, "/account/newBalance: err", err);
+        resp.status(500).json({ success: false, message: "buy exception" });
     }
 });
 

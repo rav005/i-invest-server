@@ -31,7 +31,7 @@ router.post('/getAccount', async (req, resp) => {
             const account = await Account.findOne({ _id: accountId });
             common.log(userId, "/getAccount", "account: " + JSON.stringify(account));
 
-            const stocks = await Stock.find({ _id: accountId });
+            const stocks = await Stock.find({ accountId: accountId });
             common.log(userId, "/getAccount", "stocks: " + JSON.stringify(stocks));
             if (account) {
                 resp.status(200).json({ account: account, stocks: stocks });
@@ -164,5 +164,7 @@ router.post('/newBalance', async (req, resp) => {
         resp.status(500).send();
     }
 });
+
+
 
 module.exports = router;
