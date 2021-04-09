@@ -256,7 +256,7 @@ router.post('/buyStock', async (req, resp) => {
         const account = await Account.findOne({ _id: accountId });
         if (!account) {
             common.log(userId, "/stock/buyStock account not found: ", JSON.stringify(account));
-            resp.status(400).json({ success: false, message: "no account found" });
+            resp.status(400).json({ success: false, message: "No account found" });
             return;
         }
         const orderAmount = reqBody.buyPrice * reqBody.quantity;
@@ -264,7 +264,7 @@ router.post('/buyStock', async (req, resp) => {
             const newBalance = account.balance - orderAmount;
             if (newBalance < 0) {
                 common.log(userId, "/stock/buyStock new balance is negative: ", "");
-                resp.status(400).json({ success: false, message: "insufficient balance" });
+                resp.status(400).json({ success: false, message: "Insufficient balance" });
                 return;
             }
             await Account.updateOne({ _id: accountId }, { balance: newBalance });
@@ -290,17 +290,17 @@ router.post('/buyStock', async (req, resp) => {
         await stock.save(error => {
             if (common.checkServerError(resp, error)) {
                 common.log(userId, "/stock/buyStock err: ", error, ", req: ", JSON.stringify(stock));
-                resp.status(400).json({ success: false, message: "buy err" });
+                resp.status(400).json({ success: false, message: "Buy error" });
                 return;
             }
             else {
-                resp.status(201).json({ success: true, message: "buy successful" });
+                resp.status(201).json({ success: true, message: "Buy successful!" });
                 common.log(userId, 'stock created successfully!', '');
             }
         });
     } catch (err) {
         common.log("", "/stock/buyStock: err", err);
-        resp.status(500).json({ success: false, message: "buy exception" });
+        resp.status(500).json({ success: false, message: "Buy exception" });
         return;
     }
 });
