@@ -260,8 +260,15 @@ router.post('/buyStock', async (req, resp) => {
             return;
         }
         const orderAmount = reqBody.buyPrice * reqBody.quantity;
-        const newBalance = account.balance - orderAmount;
-        await Account.updateOne({ _id: accountId }, { balance: newBalance });
+        if (reqBody.completed == true) {
+            const newBalance = account.balance - orderAmount;
+            if (newBalance < 0) {
+                common.log(userId, "/stock/buyStock new balance is negative: ", "");
+                resp.status(400).json({ success: false, message: "insufficient balance" });
+                return;
+            }
+            await Account.updateOne({ _id: accountId }, { balance: newBalance });
+        }
 
         var transaction = new Transaction();
         transaction.name = reqBody.name;
