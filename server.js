@@ -89,9 +89,9 @@ app.listen(PORT, () => {
 });
 
 process.on('uncaughtException', function (err) {
-    common.log("", "An unexpected error occurred", "uncaughtException: " + new Date());
+    common.log("", "An unexpected error occurred", "uncaughtException: " + err + ":" + new Date());
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-    common.log("", "An unexpected error occurred", "uncaughtException: " + new Date());
+    common.log("", "An unexpected error occurred", "unhandledRejection: " + reason + ":" + new Date());
 })

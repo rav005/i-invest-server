@@ -254,6 +254,11 @@ router.post('/buyStock', async (req, resp) => {
         db.connect();
 
         const account = await Account.findOne({ _id: accountId });
+        if (!account) {
+            common.log(userId, "/stock/buyStock account not found: ", JSON.stringify(account));
+            resp.status(400).json({ success: false, message: "no account found" });
+            return;
+        }
         const orderAmount = reqBody.buyPrice * reqBody.quantity;
         const newBalance = account.balance - orderAmount;
         await Account.updateOne({ _id: accountId }, { balance: newBalance });
@@ -275,11 +280,11 @@ router.post('/buyStock', async (req, resp) => {
             }
         });
 
-
         await stock.save(error => {
             if (common.checkServerError(resp, error)) {
                 common.log(userId, "/stock/buyStock err: ", error, ", req: ", JSON.stringify(stock));
                 resp.status(400).json({ success: false, message: "buy err" });
+                return;
             }
             else {
                 resp.status(201).json({ success: true, message: "buy successful" });
@@ -287,8 +292,9 @@ router.post('/buyStock', async (req, resp) => {
             }
         });
     } catch (err) {
-        common.log(userId, "/account/newBalance: err", err);
+        common.log("", "/stock/buyStock: err", err);
         resp.status(500).json({ success: false, message: "buy exception" });
+        return;
     }
 });
 
