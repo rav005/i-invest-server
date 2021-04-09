@@ -24,11 +24,6 @@ const StockSchema = mongoose.Schema({
         required: true,
         min: [0, 'Balance cannot be below 0']
     },
-    buyDate: {
-        type: Date,
-        default: Date.now,
-        required: true
-    },
     accountId: {
         type: String,
         required: true

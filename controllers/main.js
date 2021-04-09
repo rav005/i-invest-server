@@ -70,17 +70,13 @@ router.get('/forex', async (req, resp) => {
     try {
 
         common.log("", "/main/forex", "req: " + JSON.stringify(req.body));
-        const from = req.body.from;
-        const to = req.body.to;
-        if (from && to) {
-            const rate = await api.forex(from, to);
-            const twoDecimal = Math.round(rate * 100) / 100
-            common.log("", "/main/forex", "rate:" + twoDecimal);
-            resp.status(200).json({ "rate": twoDecimal });
-        }
-        else {
-            resp.status(400).json({ "message": "from currency and to currency request params required" });
-        }
+        const USD_TO_CAD = await api.forex("USD", "CAD");
+        const USD_TO_CAD_2_decimal = Math.round(USD_TO_CAD * 100) / 100
+        common.log("", "/main/forex", "USD_TO_CAD_2_decimal:" + USD_TO_CAD_2_decimal);
+        const CAD_TO_USD = await api.forex("CAD", "USD");
+        const CAD_TO_USD_2_decimal = Math.round(CAD_TO_USD * 100) / 100
+        common.log("", "/main/forex", "rate:" + CAD_TO_USD_2_decimal);
+        resp.status(200).json({ "USD_CAD": USD_TO_CAD_2_decimal, "CAD_USD": CAD_TO_USD_2_decimal });
     } catch (err) {
         common.log("", "/main/forex", "err:" + err);
         resp.status(500).send();
