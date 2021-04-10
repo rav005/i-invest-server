@@ -308,23 +308,83 @@ router.post('/buyStock', async (req, resp) => {
 router.post('/sellStock', async (req, resp) => {
     try {
         const userId = common.extractUserIdFromResponseLocals(resp);
-        common.log(userId, "/deleteAccount", "req: " + JSON.stringify(req.body));
-        const accountId = req.body.accountId;
-        if (accountId) {
-            db.connect();
-            Account.deleteOne({ _id: accountId }).then(function () {
-                resp.status(200).json({ "accountDeleted": true });
-            }).catch(function (error) {
-                resp.status(404).json({ "accountDeleted": false, "message": "error occurred" });
-            });
+        common.log(userId, "/stock/sellStock", "req: " + JSON.stringify(req.body));
+
+        var reqBody = req.body;
+        const stock = new Stock(reqBody);
+        const accountId = reqBody.accountId;
+
+        db.connect();
+
+        const account = await Account.findOne({ _id: accountId });
+        if (!account) {
+            common.log(userId, "/stock/sellStock account not found: ", JSON.stringify(account));
+            resp.status(400).json({ success: false, message: "No account found" });
+            return;
         }
-        else {
-            //only if req.body does not have account id
-            resp.status(404).send();
+        const orderAmount = reqBody.buyPrice * reqBody.quantity;
+        if (reqBody.completed == true) {
+            const newBalance = account.balance - orderAmount;
+            if (newBalance < 0) {
+                common.log(userId, "/stock/sellStock new balance is negative: ", "");
+                resp.status(400).json({ success: false, message: "Insufficient balance" });
+                return;
+            }
+            await Account.updateOne({ _id: accountId }, { balance: newBalance });
         }
+
+        var transaction = new Transaction();
+        transaction.name = reqBody.name;
+        transaction.stockSymbol = reqBody.symbol;
+        transaction.quantity = reqBody.quantity;
+        transaction.type = reqBody.type;
+        transaction.amount = orderAmount;
+        transaction.accountId = accountId;
+
+        await transaction.save(error => {
+            if (common.checkServerError(resp, error)) {
+                common.log(userId, "/stock/sellStock err: ", error, ", req: ", JSON.stringify(transaction));
+            }
+            else {
+                common.log(userId, "/stock/sellStock", 'transaction created successfully!');
+            }
+        });
+
+        await stock.save(error => {
+            if (common.checkServerError(resp, error)) {
+                common.log(userId, "/stock/sellStock err: ", error, ", req: ", JSON.stringify(stock));
+                resp.status(400).json({ success: false, message: "Buy error" });
+                return;
+            }
+            else {
+                resp.status(201).json({ success: true, message: "Buy successful!" });
+                common.log(userId, 'stock created successfully!', '');
+            }
+        });
     } catch (err) {
-        resp.status(500).send();
+        common.log("", "/stock/sellStock: err", err);
+        resp.status(500).json({ success: false, message: "Buy exception" });
+        return;
     }
+    // try {
+    //     const userId = common.extractUserIdFromResponseLocals(resp);
+    //     common.log(userId, "/deleteAccount", "req: " + JSON.stringify(req.body));
+    //     const accountId = req.body.accountId;
+    //     if (accountId) {
+    //         db.connect();
+    //         Account.deleteOne({ _id: accountId }).then(function () {
+    //             resp.status(200).json({ "accountDeleted": true });
+    //         }).catch(function (error) {
+    //             resp.status(404).json({ "accountDeleted": false, "message": "error occurred" });
+    //         });
+    //     }
+    //     else {
+    //         //only if req.body does not have account id
+    //         resp.status(404).send();
+    //     }
+    // } catch (err) {
+    //     resp.status(500).send();
+    // }
 });
 
 router.post('/historical', async (req, resp) => {

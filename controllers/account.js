@@ -6,6 +6,7 @@ const Stock = require('../models/stock');
 const jwt = require("jsonwebtoken");
 const db = require('../services/db');
 const common = require('./common');
+const api = require('./api');
 
 router.get('/getAllAccounts', async (req, resp) => {
     try {
@@ -32,19 +33,23 @@ router.post('/getAccount', async (req, resp) => {
             common.log(userId, "/getAccount", "account: " + JSON.stringify(account));
 
             const stocks = await Stock.find({ accountId: accountId });
-            common.log(userId, "/getAccount", "stocks: " + JSON.stringify(stocks));
+            console.log("arana");
+            var stockWithCurrentPrice = await api.getCurrentPriceForAccountStocks(stocks);
+            common.log(userId, "/getAccount", "stocks: " + JSON.stringify(stockWithCurrentPrice));
             if (account) {
-                resp.status(200).json({ account: account, stocks: stocks });
+                resp.status(200).json({ account: account, stocks: stockWithCurrentPrice });
             }
             else {
                 resp.status(404).json({ "message": "'" + accountId + "' not found" });
             }
 
         }
-        // only if req.body does not have account id
-        resp.status(404).send();
+        else {
+            // only if req.body does not have account id
+            resp.status(404).json({ "message": "account is required" });
+        }
     } catch (err) {
-        resp.status(500).send();
+        resp.status(500).json({ "message": err.message });
     }
 });
 

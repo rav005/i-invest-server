@@ -148,6 +148,42 @@ async function getRateForWatchList(watchList) {
         common.log("", "/api/getRateForWatchList", "unexpected error" + new Date() + " " + JSON.stringify(error));
     }
 }
+async function getCurrentPriceForAccountStocks(stocks) {
+    common.log("", "/api/getCurrentPriceForAccountStocks:  ", JSON.stringify(stocks));
+    try {
+        if (!stocks) {
+            return null;
+        }
+        const contents = await Promise.all(stocks.map(async (stock) => {
+            return new Promise((resolve, reject) => {
+                getSandboxApiObject().quote(stock.symbol, (error, data, response) => {
+                    if (error) {
+                        return reject(error);
+                    }
+                    var s = {
+                        name: stock.name,
+                        symbol: stock.symbol,
+                        currency: stock.currency,
+                        quantity: stock.quantity,
+                        buyPrice: stock.buyPrice,
+                        accountId: stock.accountId,
+                        type: stock.type,
+                        completed: stock.completed,
+                        currentPrice: data.c
+                    };
+                    return resolve(s);
+                });
+            })
+        })).then(resp => {
+            return resp;
+        }).catch(err => {
+            common.log("", "/api/getCurrentPriceForAccountStocks: err -> ", err.message);
+        });
+        return contents;
+    } catch (err) {
+        common.log("", "/api/getCurrentPriceForAccountStocks", "unexpected error" + new Date() + " " + JSON.stringify(error));
+    }
+}
 
 async function search(searchText) {
     try {
@@ -281,5 +317,6 @@ module.exports = {
     basicFinancials,
     secFilings,
     historicalData,
-    forex
+    forex,
+    getCurrentPriceForAccountStocks
 };
