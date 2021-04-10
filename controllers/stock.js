@@ -345,41 +345,40 @@ router.post('/sellStock', async (req, resp) => {
             }
         });
 
-        await stock.save(error => {
-            if (common.checkServerError(resp, error)) {
-                common.log(userId, "/stock/sellStock err: ", error, ", req: ", JSON.stringify(stock));
-                resp.status(400).json({ success: false, message: "Buy error" });
-                return;
-            }
-            else {
-                resp.status(201).json({ success: true, message: "Buy successful!" });
-                common.log(userId, 'stock created successfully!', '');
-            }
+        await Stock.deleteOne({ _id: stock.id }).then(function () {
+            common.log(userId, "/stock/sellStock", 'stock sold!');
+            resp.status(200).json({ sucess: true });
+        }).catch(function (error) {
+            common.log(userId, "/stock/sellStock", 'stock not sold!');
+            resp.status(500).json({ sucess: true, message: JSON.stringify(error) });
         });
+
     } catch (err) {
         common.log("", "/stock/sellStock: err", err);
         resp.status(500).json({ success: false, message: "Buy exception" });
         return;
     }
-    // try {
-    //     const userId = common.extractUserIdFromResponseLocals(resp);
-    //     common.log(userId, "/deleteAccount", "req: " + JSON.stringify(req.body));
-    //     const accountId = req.body.accountId;
-    //     if (accountId) {
-    //         db.connect();
-    //         Account.deleteOne({ _id: accountId }).then(function () {
-    //             resp.status(200).json({ "accountDeleted": true });
-    //         }).catch(function (error) {
-    //             resp.status(404).json({ "accountDeleted": false, "message": "error occurred" });
-    //         });
-    //     }
-    //     else {
-    //         //only if req.body does not have account id
-    //         resp.status(404).send();
-    //     }
-    // } catch (err) {
-    //     resp.status(500).send();
-    // }
+});
+
+router.post('/cancelOrder', async (req, resp) => {
+    try {
+        const userId = common.extractUserIdFromResponseLocals(resp);
+        common.log(userId, "/stock/cancelOrder", "req: " + JSON.stringify(req.body));
+
+        var stockId = req.body.stockId;
+
+        await Stock.deleteOne({ _id: stockId }).then(function () {
+            common.log(userId, "/stock/cancelOrder", 'order cancelled!');
+            resp.status(200).json({ sucess: true });
+        }).catch(function (error) {
+            common.log(userId, "/stock/cancelOrder", 'order not cancelled!');
+            resp.status(500).json({ sucess: true, message: JSON.stringify(error) });
+        });
+    } catch (error) {
+        common.log("", "/stock/cancelOrder: err", err);
+        resp.status(500).json({ success: false, message: "Order cancel exception" });
+        return;
+    }
 });
 
 router.post('/historical', async (req, resp) => {

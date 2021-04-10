@@ -161,11 +161,12 @@ async function getCurrentPriceForAccountStocks(stocks) {
                         return reject(error);
                     }
                     var s = {
+                        id: stock.id,
                         name: stock.name,
                         symbol: stock.symbol,
                         currency: stock.currency,
                         quantity: stock.quantity,
-                        buyPrice: stock.buyPrice,
+                        price: stock.price,
                         accountId: stock.accountId,
                         type: stock.type,
                         completed: stock.completed,
