@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const db = require('../services/db');
 const common = require('./common');
 
-router.get('/getAllTransactions', async (req, resp) => {
+router.post('/getAllTransactions', async (req, resp) => {
     try {
         const userId = common.extractUserIdFromResponseLocals(resp);
         common.log(userId, "/getAllTransaction", "req: " + JSON.stringify(req.body));
@@ -16,7 +16,7 @@ router.get('/getAllTransactions', async (req, resp) => {
             db.connect();
             const transactions = await Transaction.find({ accountId: accountId });
             common.log(userId, "/getAllTransaction", "transactions: " + transactions);
-            resp.status(200).json({ "accounts": transactions });
+            resp.status(200).json({ "transactions": transactions });
         }
         else {
             // only if req.body does not have account id
