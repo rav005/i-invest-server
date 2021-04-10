@@ -365,7 +365,50 @@ router.post('/cancelOrder', async (req, resp) => {
         const userId = common.extractUserIdFromResponseLocals(resp);
         common.log(userId, "/stock/cancelOrder", "req: " + JSON.stringify(req.body));
 
-        var stockId = req.body.stockId;
+        const reqBody = req.body;
+        const stockId = reqBody.stockId;
+        const accountId = reqBody.accountId;
+
+        db.connect();
+
+        const account = await Account.findOne({ _id: accountId });
+        if (!account) {
+            common.log(userId, "/stock/cancelOrder account not found: ", JSON.stringify(account));
+            resp.status(400).json({ success: false, message: "No account found" });
+            return;
+        }
+
+        const stock = await Stock.findOne({ _id: stockId });
+        if (!stock) {
+            common.log(userId, "/stock/cancelOrder account not found: ", JSON.stringify(account));
+            resp.status(400).json({ success: false, message: "No stock found" });
+            return;
+        }
+
+        const orderAmount = stock.price * stock.quantity;
+        if (reqBody.completed == true) {
+            const newBalance = account.balance + orderAmount;
+            await Account.updateOne({ _id: accountId }, { balance: newBalance });
+        }
+
+        var transaction = new Transaction();
+        transaction.name = stock.name;
+        transaction.stockSymbol = stock.symbol;
+        transaction.quantity = stock.quantity;
+        transaction.type = "Canceled";
+        transaction.amount = orderAmount;
+        transaction.accountId = accountId;
+
+        await transaction.save(error => {
+            if (common.checkServerError(resp, error)) {
+                common.log(userId, "/stock/cancelOrder err: ", error, ", req: ", JSON.stringify(transaction));
+            }
+            else {
+                common.log(userId, "/stock/cancelOrder", 'transaction created successfully!');
+            }
+        });
+
+
 
         await Stock.deleteOne({ _id: stockId }).then(function () {
             common.log(userId, "/stock/cancelOrder", 'order cancelled!');
@@ -375,7 +418,7 @@ router.post('/cancelOrder', async (req, resp) => {
             resp.status(500).json({ sucess: true, message: JSON.stringify(error) });
         });
     } catch (error) {
-        common.log("", "/stock/cancelOrder: err", err);
+        common.log("", "/stock/cancelOrder: err", error);
         resp.status(500).json({ success: false, message: "Order cancel exception" });
         return;
     }

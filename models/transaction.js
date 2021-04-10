@@ -12,7 +12,7 @@ const TransactionSchema = mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['Market buy', 'Market sell', 'Limit buy', 'Limit sell', 'Initial deposit', 'Deposit', 'Withdraw'],
+        enum: ['Market buy', 'Market sell', 'Limit buy', 'Limit sell', 'Initial deposit', 'Deposit', 'Withdraw', 'Canceled'],
         required: true
     },
     amount: {
