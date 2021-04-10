@@ -53,6 +53,27 @@ router.post('/getAccount', async (req, resp) => {
     }
 });
 
+router.post('/getAllTransactions', async (req, resp) => {
+    try {
+        const userId = common.extractUserIdFromResponseLocals(resp);
+        common.log(userId, "/getAllTransaction", "req: " + JSON.stringify(req.body));
+
+        const accountId = req.body.accountId;
+        if (accountId) {
+            db.connect();
+            const transactions = await Transaction.find({ accountId: accountId });
+            common.log(userId, "/getAllTransaction", "transactions: " + transactions);
+            resp.status(200).json({ "transactions": transactions });
+        }
+        else {
+            // only if req.body does not have account id
+            resp.status(400).json({ message: "account id required" });
+        }
+    } catch (err) {
+        resp.status(500).send();
+    }
+});
+
 router.post('/addAccount', async (req, resp) => {
     try {
         const userId = common.extractUserIdFromResponseLocals(resp);

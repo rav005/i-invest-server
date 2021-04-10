@@ -259,7 +259,7 @@ router.post('/buyStock', async (req, resp) => {
             resp.status(400).json({ success: false, message: "No account found" });
             return;
         }
-        const orderAmount = reqBody.buyPrice * reqBody.quantity;
+        const orderAmount = reqBody.price * reqBody.quantity;
         if (reqBody.completed == true) {
             const newBalance = account.balance - orderAmount;
             if (newBalance < 0) {
@@ -322,14 +322,9 @@ router.post('/sellStock', async (req, resp) => {
             resp.status(400).json({ success: false, message: "No account found" });
             return;
         }
-        const orderAmount = reqBody.buyPrice * reqBody.quantity;
+        const orderAmount = reqBody.price * reqBody.quantity;
         if (reqBody.completed == true) {
-            const newBalance = account.balance - orderAmount;
-            if (newBalance < 0) {
-                common.log(userId, "/stock/sellStock new balance is negative: ", "");
-                resp.status(400).json({ success: false, message: "Insufficient balance" });
-                return;
-            }
+            const newBalance = account.balance + orderAmount;
             await Account.updateOne({ _id: accountId }, { balance: newBalance });
         }
 

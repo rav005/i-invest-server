@@ -18,7 +18,7 @@ const StockSchema = mongoose.Schema({
         required: true,
         min: [0, 'quantity cannot be below 0']
     },
-    buyPrice: {
+    price: {
         // price per stock
         type: Number,
         required: true,
