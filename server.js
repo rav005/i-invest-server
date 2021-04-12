@@ -76,7 +76,7 @@ app.get('/status', (req, resp) => {
 });
 
 // cron
-cron.schedule('*/5 * * * * *', function () {
+cron.schedule('*/5 * * * *', function () {
     cronjob.transaction();
 });
 

@@ -18,7 +18,8 @@ function isMarketOpen() {
 
     var hours = now.getHours();
     var minute = now.getMinutes();
-    if (day >= 1 && day <= 5 && hours >= 9 && hours <= 4 && minute >= 30) {
+
+    if (day >= 1 && day <= 5 && hours >= 9 && hours <= 16 && minute >= 30) {
         return true;
     }
     else {
@@ -29,18 +30,22 @@ function isMarketOpen() {
 
 async function transaction() {
     try {
-        common.log("", "cronjob/transaction", "running a task: " + new Date());
+        //common.log("", "cronjob/transaction", "running a task: " + new Date());
 
         if (isMarketOpen()) {
+            console.log("==========");
+
+            //common.log("", "cronjob/transaction", "market open: " + new Date());
 
             db.connect();
             var stocks = await Stock.find({ completed: false, type: ['Limit buy', 'Limit sell'] });
 
             stocks.forEach(async x => {
                 console.log(x);
-                const symbol = x;
+                const symbol = x.symbol;
                 const respData = await api.getStockCurrentRate(symbol);
                 const currentStockPrice = respData.c;
+                //console.log(currentStockPrice);
 
                 const orderTotal = x.price * x.quantity
                 if (('Limit buy' == x.type && currentStockPrice <= x.price) ||
