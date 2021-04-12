@@ -10,7 +10,6 @@ const mainRoutes = require('./controllers/main');
 const userRoutes = require('./controllers/user');
 const accountRoutes = require('./controllers/account');
 const stockRoutes = require('./controllers/stock');
-const transactionRoutes = require('./controllers/transaction');
 const { JsonWebTokenError } = require('jsonwebtoken');
 
 const app = express();
@@ -70,8 +69,6 @@ app.use('/user', userRoutes);
 app.use('/account', accountRoutes);
 
 app.use('/stock', stockRoutes);
-
-app.use('/transaction', transactionRoutes);
 
 app.get('/status', (req, resp) => {
     common.log("", "/status", "code: 200");

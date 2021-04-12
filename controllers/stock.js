@@ -152,32 +152,6 @@ router.post('/basicFinancials', async (req, resp) => {
     }
 });
 
-
-router.post('/secFilings', async (req, resp) => {
-    try {
-        const userId = common.extractUserIdFromResponseLocals(resp);
-        common.log(userId, "/stock/secFilings", "req: " + JSON.stringify(req.body));
-
-        const symbol = req.body.symbol;
-        if (symbol) {
-            const respData = await api.secFilings(symbol);
-            if (respData) {
-                common.log(userId, "/stock/secFilings: ", JSON.stringify(respData));
-                resp.status(200).json(respData);
-            }
-            else {
-                common.log(userId, "/stock/secFilings: err", JSON.stringify(respData));
-                resp.status(400).send();
-            }
-        }
-        else {
-            resp.status(400).send();
-        }
-    } catch (err) {
-        resp.status(500).send();
-    }
-});
-
 router.post('/addToWatchlist', async (req, resp) => {
     try {
         const userId = common.extractUserIdFromResponseLocals(resp);
@@ -311,8 +285,12 @@ router.post('/sellStock', async (req, resp) => {
         common.log(userId, "/stock/sellStock", "req: " + JSON.stringify(req.body));
 
         var reqBody = req.body;
-        const stock = new Stock(reqBody);
         const accountId = reqBody.accountId;
+        const stockId = reqBody.stockId;
+        const type = reqBody.type;
+        const quantity = reqBody.quantity;
+        const price = reqBody.price;
+        const completed = reqBody.completed;
 
         db.connect();
 
@@ -322,17 +300,25 @@ router.post('/sellStock', async (req, resp) => {
             resp.status(400).json({ success: false, message: "No account found" });
             return;
         }
-        const orderAmount = reqBody.price * reqBody.quantity;
-        if (reqBody.completed == true) {
+
+        const stock = await Stock.findOne({ _id: stockId });
+        if (!stock) {
+            common.log(userId, "/stock/sellStock stock not found: ", JSON.stringify(stock));
+            resp.status(400).json({ success: false, message: "No stock found" });
+            return;
+        }
+
+        const orderAmount = price * quantity;
+        if (completed == true) {
             const newBalance = account.balance + orderAmount;
             await Account.updateOne({ _id: accountId }, { balance: newBalance });
         }
 
         var transaction = new Transaction();
-        transaction.name = reqBody.name;
-        transaction.stockSymbol = reqBody.symbol;
-        transaction.quantity = reqBody.quantity;
-        transaction.type = reqBody.type;
+        transaction.name = stock.name;
+        transaction.stockSymbol = stock.symbol;
+        transaction.quantity = quantity;
+        transaction.type = type;
         transaction.amount = orderAmount;
         transaction.accountId = accountId;
 
@@ -345,13 +331,21 @@ router.post('/sellStock', async (req, resp) => {
             }
         });
 
-        await Stock.deleteOne({ _id: stock.id }).then(function () {
-            common.log(userId, "/stock/sellStock", 'stock sold!');
+        const quantityRemaining = (stock.quantity - quantity);
+        if (quantityRemaining == 0) {
+            await Stock.deleteOne({ _id: stock.id }).then(function () {
+                common.log(userId, "/stock/sellStock", 'all stock sold!');
+                resp.status(200).json({ sucess: true });
+            }).catch(function (error) {
+                common.log(userId, "/stock/sellStock", 'stock not sold!');
+                resp.status(500).json({ sucess: true, message: JSON.stringify(error) });
+            });
+        }
+        else {
+            await Stock.updateOne({ _id: stockId }, { quantity: quantityRemaining });
+            common.log(userId, "/stock/sellStock", 'stock remaining:', quantityRemaining);
             resp.status(200).json({ sucess: true });
-        }).catch(function (error) {
-            common.log(userId, "/stock/sellStock", 'stock not sold!');
-            resp.status(500).json({ sucess: true, message: JSON.stringify(error) });
-        });
+        }
 
     } catch (err) {
         common.log("", "/stock/sellStock: err", err);
@@ -407,8 +401,6 @@ router.post('/cancelOrder', async (req, resp) => {
                 common.log(userId, "/stock/cancelOrder", 'transaction created successfully!');
             }
         });
-
-
 
         await Stock.deleteOne({ _id: stockId }).then(function () {
             common.log(userId, "/stock/cancelOrder", 'order cancelled!');

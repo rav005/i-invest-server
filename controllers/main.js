@@ -2,28 +2,8 @@ const express = require('express');
 const router = express.Router();
 const common = require('./common');
 const api = require('./api');
-const axios = require('axios');
 var path = require('path');
 const e = require('express');
-
-// refer to https://finnhub.io/docs/api/symbol-search
-router.post('/searchText', async (req, resp) => {
-    try {
-        common.log("", "/searchText", "req: " + JSON.stringify(req.body));
-
-        const searchText = req.body.searchText;
-        if (searchText) {
-            const respData = await api.search(searchText);
-            common.log("/search: ", respData);
-            resp.status(200).json(respData);
-        }
-        else {
-            resp.status(400).send();
-        }
-    } catch (err) {
-        resp.status(500).send();
-    }
-});
 
 router.get('/marketNews', async (req, resp) => {
     try {
@@ -68,7 +48,6 @@ router.get('/getStocksfile', async (req, resp) => {
 
 router.get('/forex', async (req, resp) => {
     try {
-
         common.log("", "/main/forex", "req: " + JSON.stringify(req.body));
         const USD_TO_CAD = await api.forex("USD", "CAD");
         const USD_TO_CAD_2_decimal = Math.round(USD_TO_CAD * 100) / 100
