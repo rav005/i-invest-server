@@ -234,15 +234,13 @@ router.post('/buyStock', async (req, resp) => {
             return;
         }
         const orderAmount = reqBody.price * reqBody.quantity;
-        if (reqBody.completed == true) {
-            const newBalance = account.balance - orderAmount;
-            if (newBalance < 0) {
-                common.log(userId, "/stock/buyStock new balance is negative: ", "");
-                resp.status(400).json({ success: false, message: "Insufficient balance" });
-                return;
-            }
-            await Account.updateOne({ _id: accountId }, { balance: newBalance });
+        const newBalance = account.balance - orderAmount;
+        if (newBalance < 0) {
+            common.log(userId, "/stock/buyStock new balance is negative: ", "");
+            resp.status(400).json({ success: false, message: "Insufficient balance" });
+            return;
         }
+        await Account.updateOne({ _id: accountId }, { balance: newBalance });
 
         var transaction = new Transaction();
         transaction.name = reqBody.name;
@@ -309,10 +307,8 @@ router.post('/sellStock', async (req, resp) => {
         }
 
         const orderAmount = price * quantity;
-        if (completed == true) {
-            const newBalance = account.balance + orderAmount;
-            await Account.updateOne({ _id: accountId }, { balance: newBalance });
-        }
+        const newBalance = account.balance + orderAmount;
+        await Account.updateOne({ _id: accountId }, { balance: newBalance });
 
         var transaction = new Transaction();
         transaction.name = stock.name;
@@ -335,16 +331,38 @@ router.post('/sellStock', async (req, resp) => {
         if (quantityRemaining == 0) {
             await Stock.deleteOne({ _id: stock.id }).then(function () {
                 common.log(userId, "/stock/sellStock", 'all stock sold!');
-                resp.status(200).json({ sucess: true });
+                resp.status(200).json({ success: true });
             }).catch(function (error) {
                 common.log(userId, "/stock/sellStock", 'stock not sold!');
-                resp.status(500).json({ sucess: true, message: JSON.stringify(error) });
+                resp.status(500).json({ success: true, message: JSON.stringify(error) });
             });
         }
         else {
+            // update existing stock holding
             await Stock.updateOne({ _id: stockId }, { quantity: quantityRemaining });
             common.log(userId, "/stock/sellStock", 'stock remaining:', quantityRemaining);
-            resp.status(200).json({ sucess: true });
+
+            // add new stock sell order
+            var newStockOrder = Stock();
+            newStockOrder.name = stock.name;
+            newStockOrder.type = 'Limit sell';
+            newStockOrder.symbol = stock.symbol;
+            newStockOrder.currency = stock.currency;
+            newStockOrder.quantity = quantity;
+            newStockOrder.price = price;
+            newStockOrder.accountId = accountId;
+            newStockOrder.completed = false;
+
+            await newStockOrder.save(error => {
+                if (common.checkServerError(resp, error)) {
+                    common.log(userId, "/stock/sellStock newStockOrder err: ", error, ", req: ", JSON.stringify(newStockOrder));
+                }
+                else {
+                    common.log(userId, "/stock/cancelOrder", 'newStockOrder created!');
+                }
+            });
+            resp.status(200).json({ success: true });
+
         }
 
     } catch (err) {
@@ -380,10 +398,8 @@ router.post('/cancelOrder', async (req, resp) => {
         }
 
         const orderAmount = stock.price * stock.quantity;
-        if (reqBody.completed == true) {
-            const newBalance = account.balance + orderAmount;
-            await Account.updateOne({ _id: accountId }, { balance: newBalance });
-        }
+        const newBalance = account.balance + orderAmount;
+        await Account.updateOne({ _id: accountId }, { balance: newBalance });
 
         var transaction = new Transaction();
         transaction.name = stock.name;
@@ -404,10 +420,10 @@ router.post('/cancelOrder', async (req, resp) => {
 
         await Stock.deleteOne({ _id: stockId }).then(function () {
             common.log(userId, "/stock/cancelOrder", 'order cancelled!');
-            resp.status(200).json({ sucess: true });
+            resp.status(200).json({ success: true });
         }).catch(function (error) {
             common.log(userId, "/stock/cancelOrder", 'order not cancelled!');
-            resp.status(500).json({ sucess: true, message: JSON.stringify(error) });
+            resp.status(500).json({ success: true, message: JSON.stringify(error) });
         });
     } catch (error) {
         common.log("", "/stock/cancelOrder: err", error);
