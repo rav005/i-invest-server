@@ -351,27 +351,29 @@ router.post('/sellStock', async (req, resp) => {
             await Stock.updateOne({ _id: stockId }, { quantity: quantityRemaining });
             common.log(userId, "/stock/sellStock", 'stock remaining:', quantityRemaining);
 
-            // add new stock sell order
-            var newStockOrder = Stock();
-            newStockOrder.name = stock.name;
-            newStockOrder.type = 'Limit sell';
-            newStockOrder.symbol = stock.symbol;
-            newStockOrder.currency = stock.currency;
-            newStockOrder.quantity = quantity;
-            newStockOrder.price = price;
-            newStockOrder.accountId = accountId;
-            newStockOrder.completed = false;
+            if (stock.type == 'Limit sell') {
 
-            await newStockOrder.save(error => {
-                if (common.checkServerError(resp, error)) {
-                    common.log(userId, "/stock/sellStock newStockOrder err: ", error, ", req: ", JSON.stringify(newStockOrder));
-                }
-                else {
-                    common.log(userId, "/stock/cancelOrder", 'newStockOrder created!');
-                }
-            });
+                // add new stock sell order
+                var newStockOrder = Stock();
+                newStockOrder.name = stock.name;
+                newStockOrder.type = stock.type;
+                newStockOrder.symbol = stock.symbol;
+                newStockOrder.currency = stock.currency;
+                newStockOrder.quantity = quantity;
+                newStockOrder.price = price;
+                newStockOrder.accountId = accountId;
+                newStockOrder.completed = false;
+
+                await newStockOrder.save(error => {
+                    if (common.checkServerError(resp, error)) {
+                        common.log(userId, "/stock/sellStock newStockOrder err: ", error, ", req: ", JSON.stringify(newStockOrder));
+                    }
+                    else {
+                        common.log(userId, "/stock/cancelOrder", 'newStockOrder created!');
+                    }
+                });
+            }
             resp.status(200).json({ success: true });
-
         }
 
     } catch (err) {

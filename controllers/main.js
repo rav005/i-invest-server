@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const common = require('./common');
+const User = require('../models/user');
 const api = require('./api');
 var path = require('path');
 const e = require('express');
