@@ -48,10 +48,10 @@ router.get('/getStocksfile', async (req, resp) => {
 
 router.get('/forex', async (req, resp) => {
     try {
-        var json = common.getForex();
-        resp.status(200).json(json);
+        var data = await api.getForex();
+        resp.status(200).json(data);
     } catch (err) {
-        common.log("", "/main/forex", "err:" + err);
+        //common.log("", "/main/forex", "err:" + err);
         resp.status(500).send();
     }
 });

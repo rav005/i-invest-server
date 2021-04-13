@@ -284,7 +284,6 @@ async function historicalData(symbol) {
 
 async function forex(from, to) {
     if (from && to) {
-
         try {
             apiUrl = "https://api.ratesapi.io/api/latest?base=" + from.toUpperCase() + "&symbols=" + to.toUpperCase();
             const responseData = await axios.get(apiUrl);
@@ -308,6 +307,19 @@ async function forex(from, to) {
     }
 }
 
+async function getForex() {
+    try {
+        const USD_TO_CAD = await api.forex("USD", "CAD");
+        const USD_TO_CAD_2_decimal = Math.round(USD_TO_CAD * 100) / 100
+        const CAD_TO_USD = await api.forex("CAD", "USD");
+        const CAD_TO_USD_2_decimal = Math.round(CAD_TO_USD * 100) / 100
+        var json = { "USD_CAD": USD_TO_CAD_2_decimal, "CAD_USD": CAD_TO_USD_2_decimal };
+        return json;
+    } catch (err) {
+        var json = { success: false, "message": "common error" };
+    }
+}
+
 module.exports = {
     getStockCurrentRate,
     getRateForWatchList,
@@ -319,5 +331,6 @@ module.exports = {
     secFilings,
     historicalData,
     forex,
-    getCurrentPriceForAccountStocks
+    getCurrentPriceForAccountStocks,
+    getForex
 };

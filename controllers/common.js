@@ -1,7 +1,6 @@
 require('dotenv').config();
 const jwt = require("jsonwebtoken");
 const db = require('../services/db');
-
 const User = require('../models/user');
 
 function log(userId, path, msg) {
@@ -27,7 +26,7 @@ async function findUserByUsername(username) {
         //db.disconnect();
         return user;
     } catch (error) {
-        common.log("", "common/findUserByUsername", "unexpected error" + new Date(+ " " + JSON.stringify(error)));
+        log("", "common/findUserByUsername", "unexpected error" + new Date(+ " " + JSON.stringify(error)));
     }
 }
 
@@ -38,7 +37,7 @@ async function findUserById(id) {
         //db.disconnect();
         return user;
     } catch (error) {
-        common.log("", "common/findUserById", "unexpected error" + new Date() + " " + JSON.stringify(error));
+        log("", "common/findUserById", "unexpected error" + new Date() + " " + JSON.stringify(error));
     }
 }
 
@@ -53,7 +52,7 @@ function verifyJwt(token) {
             const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
             return decoded.id;
         } catch (error) {
-            common.log("", "common/findUserById", "jwt token error" + new Date() + " " + JSON.stringify(error));
+            log("", "common/findUserById", "jwt token error" + new Date() + " " + JSON.stringify(error));
 
             return null;
         }
@@ -65,7 +64,7 @@ function extractUserIdFromResponseLocals(resp) {
     try {
         return resp.locals.userId;
     } catch (error) {
-        common.log("", "common/extractUserIdFromResponseLocals", "unexpected error" + new Date() + " " + JSON.stringify(error));
+        log("", "common/extractUserIdFromResponseLocals", "unexpected error" + new Date() + " " + JSON.stringify(error));
     }
 }
 
@@ -77,7 +76,7 @@ function isValidQuote(json) {
         const isZero = (currentValue) => currentValue == 0;
         return !Object.values(json).every(isZero);
     } catch (error) {
-        common.log("", "common/isValidQuote", "unexpected error" + new Date() + " " + JSON.stringify(error));
+        log("", "common/isValidQuote", "unexpected error" + new Date() + " " + JSON.stringify(error));
     }
 }
 
@@ -95,7 +94,7 @@ function formatDate(date) {
 
         return [year, month, day].join('-');
     } catch (error) {
-        common.log("", "common/formatDate", "unexpected error" + new Date() + " " + JSON.stringify(error));
+        log("", "common/formatDate", "unexpected error" + new Date() + " " + JSON.stringify(error));
     }
 }
 
@@ -105,7 +104,7 @@ function getFromDate() {
         d.setDate(d.getDate() - 21);
         return formatDate(d);
     } catch (error) {
-        common.log("", "common/getFromDate", "unexpected error" + new Date() + " " + JSON.stringify(error));
+        log("", "common/getFromDate", "unexpected error" + new Date() + " " + JSON.stringify(error));
     }
 }
 
@@ -113,24 +112,7 @@ function getToDate() {
     try {
         return formatDate(new Date());
     } catch (error) {
-        common.log("", "common/getToDate", "unexpected error" + new Date() + " " + JSON.stringify(error));
-    }
-}
-
-function getForex() {
-    try {
-        common.log("", "/main/forex", "req: " + JSON.stringify(req.body));
-        const USD_TO_CAD = await api.forex("USD", "CAD");
-        const USD_TO_CAD_2_decimal = Math.round(USD_TO_CAD * 100) / 100
-        common.log("", "/main/forex", "USD_TO_CAD_2_decimal:" + USD_TO_CAD_2_decimal);
-        const CAD_TO_USD = await api.forex("CAD", "USD");
-        const CAD_TO_USD_2_decimal = Math.round(CAD_TO_USD * 100) / 100
-        common.log("", "/main/forex", "rate:" + CAD_TO_USD_2_decimal);
-        var json = { "USD_CAD": USD_TO_CAD_2_decimal, "CAD_USD": CAD_TO_USD_2_decimal };
-        return json;
-    } catch (err) {
-        common.log("", "/main/forex", "err:" + err);
-        var json = { success: false, "message": "common error" };
+        log("", "common/getToDate", "unexpected error" + new Date() + " " + JSON.stringify(error));
     }
 }
 
@@ -144,6 +126,5 @@ module.exports = {
     extractUserIdFromResponseLocals,
     isValidQuote,
     getFromDate,
-    getToDate,
-    getForex
+    getToDate
 };
