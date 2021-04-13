@@ -40,6 +40,8 @@ async function transaction() {
             db.connect();
             var stocks = await Stock.find({ completed: false, type: ['Limit buy', 'Limit sell'] });
 
+            var forex = common.getForex();
+
             stocks.forEach(async x => {
                 console.log(x);
                 const symbol = x.symbol;
@@ -47,14 +49,38 @@ async function transaction() {
                 const currentStockPrice = respData.c;
                 //console.log(currentStockPrice);
 
-                const orderTotal = x.price * x.quantity
                 if (('Limit buy' == x.type && currentStockPrice <= x.price) ||
                     ('Limit sell' == x.type && currentStockPrice >= x.price)) {
+
+                    const account = await Account.findOne({ _id: stock.accountId });
+
+                    var exchangeRate = 1;
+                    if (stock.currency == 'USD' && account?.currency != 'USD') {
+                        exchangeRate = forex.CAD_USD;
+                    } else if (stock.currency == 'CAD' && account?.currency != 'CAD') {
+                        exchangeRate = forex.USD_CAD;
+                    } else {
+                        exchangeRate = exchangeRate;
+                    }
+
+                    const orderTotal = (x.price * x.quantity) * exchangeRate;
+
+                    var orderFail = false;
+                    if ((account.balance - orderTotal) < 0) {
+                        orderFail = true;
+
+                    }
+
                     var transaction = new Transaction();
                     transaction.name = x.name;
                     transaction.stockSymbol = x.symbol;
                     transaction.quantity = x.quantity;
-                    transaction.type = x.type;
+                    if (orderFail) {
+                        transaction.type = 'Limit buy failed(insufficient funds)';
+                    }
+                    else {
+                        transaction.type = x.type;
+                    }
                     transaction.amount = orderTotal;
                     transaction.accountId = x.accountId;
 
@@ -67,8 +93,26 @@ async function transaction() {
                         }
                     });
 
-                    await Stock.updateOne({ _id: x._id }, { completed: true });
+                    if (orderFail) {
+                        Stock.deleteOne({ _id: x._id }).then(function () {
+                            common.log(userId, "cronjob/transaction", 'stock order failed:', x._id);
+                        }).catch(function (error) {
+                            common.log(userId, "cronjob/transaction", 'error deleting failed stock order:', x._id);
+                        });
+                    }
+                    else {
+                        await Stock.updateOne({ _id: x._id }, { completed: true });
+                        const newBalance = account.balance;
+                        if ('Limit buy' == x.type) {
+                            newBalance = account.balance - orderTotal;
+                        }
+                        else if ('Limit sell' == x.type) {
+                            newBalance = account.balance + orderTotal;
+                        }
+                        await Account.updateOne({ _id: accountId }, { balance: newBalance });
+                    }
                 }
+
             });
         }
     } catch (error) {

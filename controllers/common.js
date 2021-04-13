@@ -117,6 +117,23 @@ function getToDate() {
     }
 }
 
+function getForex() {
+    try {
+        common.log("", "/main/forex", "req: " + JSON.stringify(req.body));
+        const USD_TO_CAD = await api.forex("USD", "CAD");
+        const USD_TO_CAD_2_decimal = Math.round(USD_TO_CAD * 100) / 100
+        common.log("", "/main/forex", "USD_TO_CAD_2_decimal:" + USD_TO_CAD_2_decimal);
+        const CAD_TO_USD = await api.forex("CAD", "USD");
+        const CAD_TO_USD_2_decimal = Math.round(CAD_TO_USD * 100) / 100
+        common.log("", "/main/forex", "rate:" + CAD_TO_USD_2_decimal);
+        var json = { "USD_CAD": USD_TO_CAD_2_decimal, "CAD_USD": CAD_TO_USD_2_decimal };
+        return json;
+    } catch (err) {
+        common.log("", "/main/forex", "err:" + err);
+        var json = { success: false, "message": "common error" };
+    }
+}
+
 module.exports = {
     log,
     checkServerError,
@@ -127,5 +144,6 @@ module.exports = {
     extractUserIdFromResponseLocals,
     isValidQuote,
     getFromDate,
-    getToDate
+    getToDate,
+    getForex
 };

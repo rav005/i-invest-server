@@ -234,30 +234,35 @@ router.post('/buyStock', async (req, resp) => {
             return;
         }
         const orderAmount = reqBody.price * reqBody.quantity;
-        const newBalance = account.balance - orderAmount;
-        if (newBalance < 0) {
-            common.log(userId, "/stock/buyStock new balance is negative: ", "");
-            resp.status(400).json({ success: false, message: "Insufficient balance" });
-            return;
+
+        if (reqBody.completed == true) {
+            const newBalance = account.balance - orderAmount;
+            if (newBalance < 0) {
+                common.log(userId, "/stock/buyStock new balance is negative: ", "");
+                resp.status(400).json({ success: false, message: "Insufficient balance" });
+                return;
+            }
+            await Account.updateOne({ _id: accountId }, { balance: newBalance });
         }
-        await Account.updateOne({ _id: accountId }, { balance: newBalance });
 
-        var transaction = new Transaction();
-        transaction.name = reqBody.name;
-        transaction.stockSymbol = reqBody.symbol;
-        transaction.quantity = reqBody.quantity;
-        transaction.type = reqBody.type;
-        transaction.amount = orderAmount;
-        transaction.accountId = accountId;
+        if (stock.type != 'Limit buy') {
+            var transaction = new Transaction();
+            transaction.name = reqBody.name;
+            transaction.stockSymbol = reqBody.symbol;
+            transaction.quantity = reqBody.quantity;
+            transaction.type = reqBody.type;
+            transaction.amount = orderAmount;
+            transaction.accountId = accountId;
 
-        await transaction.save(error => {
-            if (common.checkServerError(resp, error)) {
-                common.log(userId, "/stock/buyStock err: ", error, ", req: ", JSON.stringify(transaction));
-            }
-            else {
-                common.log(userId, "/stock/buyStock", 'transaction created successfully!');
-            }
-        });
+            await transaction.save(error => {
+                if (common.checkServerError(resp, error)) {
+                    common.log(userId, "/stock/buyStock err: ", error, ", req: ", JSON.stringify(transaction));
+                }
+                else {
+                    common.log(userId, "/stock/buyStock", 'transaction created successfully!');
+                }
+            });
+        }
 
         await stock.save(error => {
             if (common.checkServerError(resp, error)) {
@@ -306,26 +311,30 @@ router.post('/sellStock', async (req, resp) => {
             return;
         }
 
-        const orderAmount = price * quantity;
-        const newBalance = account.balance + orderAmount;
-        await Account.updateOne({ _id: accountId }, { balance: newBalance });
+        if (reqBody.completed == true) {
+            const orderAmount = price * quantity;
+            const newBalance = account.balance + orderAmount;
+            await Account.updateOne({ _id: accountId }, { balance: newBalance });
+        }
 
-        var transaction = new Transaction();
-        transaction.name = stock.name;
-        transaction.stockSymbol = stock.symbol;
-        transaction.quantity = quantity;
-        transaction.type = type;
-        transaction.amount = orderAmount;
-        transaction.accountId = accountId;
+        if (stock.type != 'Limit sell') {
+            var transaction = new Transaction();
+            transaction.name = stock.name;
+            transaction.stockSymbol = stock.symbol;
+            transaction.quantity = quantity;
+            transaction.type = type;
+            transaction.amount = orderAmount;
+            transaction.accountId = accountId;
 
-        await transaction.save(error => {
-            if (common.checkServerError(resp, error)) {
-                common.log(userId, "/stock/sellStock err: ", error, ", req: ", JSON.stringify(transaction));
-            }
-            else {
-                common.log(userId, "/stock/sellStock", 'transaction created successfully!');
-            }
-        });
+            await transaction.save(error => {
+                if (common.checkServerError(resp, error)) {
+                    common.log(userId, "/stock/sellStock err: ", error, ", req: ", JSON.stringify(transaction));
+                }
+                else {
+                    common.log(userId, "/stock/sellStock", 'transaction created successfully!');
+                }
+            });
+        }
 
         const quantityRemaining = (stock.quantity - quantity);
         if (quantityRemaining == 0) {
