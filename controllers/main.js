@@ -57,12 +57,12 @@ router.get('/forex', async (req, resp) => {
     }
 });
 
-router.get('/deleteUser', async (req, resp) => {
+router.post('/deleteUser', async (req, resp) => {
     try {
         const userId = common.extractUserIdFromResponseLocals(resp);
         common.log(userId, "/main/deleteUser", "req: " + JSON.stringify(req.body));
 
-        Account.deleteOne({ _id: userId }).then(function () {
+        User.deleteOne({ _id: userId }).then(function () {
             common.log(userId, "/main/deleteUser", 'user deleted!');
             resp.status(200).json({ success: true });
         }).catch(function (error) {
