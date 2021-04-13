@@ -410,7 +410,6 @@ router.post('/cancelOrder', async (req, resp) => {
 
         const orderAmount = stock.price * stock.quantity;
         const newBalance = account.balance + orderAmount;
-        await Account.updateOne({ _id: accountId }, { balance: newBalance });
 
         var transaction = new Transaction();
         transaction.name = stock.name;
