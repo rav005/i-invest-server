@@ -311,8 +311,8 @@ router.post('/sellStock', async (req, resp) => {
             return;
         }
 
+        const orderAmount = price * quantity;
         if (reqBody.completed == true) {
-            const orderAmount = price * quantity;
             const newBalance = account.balance + orderAmount;
             await Account.updateOne({ _id: accountId }, { balance: newBalance });
         }
@@ -376,7 +376,7 @@ router.post('/sellStock', async (req, resp) => {
 
     } catch (err) {
         common.log("", "/stock/sellStock: err", err);
-        resp.status(500).json({ success: false, message: "Buy exception" });
+        resp.status(500).json({ success: false, message: "sell exception" });
         return;
     }
 });

@@ -309,9 +309,9 @@ async function forex(from, to) {
 
 async function getForex() {
     try {
-        const USD_TO_CAD = await api.forex("USD", "CAD");
+        const USD_TO_CAD = await forex("USD", "CAD");
         const USD_TO_CAD_2_decimal = Math.round(USD_TO_CAD * 100) / 100
-        const CAD_TO_USD = await api.forex("CAD", "USD");
+        const CAD_TO_USD = await forex("CAD", "USD");
         const CAD_TO_USD_2_decimal = Math.round(CAD_TO_USD * 100) / 100
         var json = { "USD_CAD": USD_TO_CAD_2_decimal, "CAD_USD": CAD_TO_USD_2_decimal };
         return json;
