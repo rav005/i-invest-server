@@ -317,7 +317,7 @@ router.post('/sellStock', async (req, resp) => {
             await Account.updateOne({ _id: accountId }, { balance: newBalance });
         }
 
-        if (stock.type != 'Limit sell') {
+        if (type === 'Market sell') {
             var transaction = new Transaction();
             transaction.name = stock.name;
             transaction.stockSymbol = stock.symbol;
@@ -351,15 +351,18 @@ router.post('/sellStock', async (req, resp) => {
             await Stock.updateOne({ _id: stockId }, { quantity: quantityRemaining });
             common.log(userId, "/stock/sellStock", 'stock remaining:', quantityRemaining);
 
-            if (stock.type == 'Limit sell') {
+            if (type === 'Limit sell') {
 
                 // add new stock sell order
                 var newStockOrder = Stock();
                 newStockOrder.name = stock.name;
-                newStockOrder.type = stock.type;
+                newStockOrder.type = "Limit sell";
                 newStockOrder.symbol = stock.symbol;
                 newStockOrder.currency = stock.currency;
                 newStockOrder.quantity = quantity;
+                // original purchase price
+                newStockOrder.purchasePrice = stock.price;
+                // limit sell price
                 newStockOrder.price = price;
                 newStockOrder.accountId = accountId;
                 newStockOrder.completed = false;
@@ -409,8 +412,6 @@ router.post('/cancelOrder', async (req, resp) => {
         }
 
         const orderAmount = stock.price * stock.quantity;
-        const newBalance = account.balance + orderAmount;
-
         var transaction = new Transaction();
         transaction.name = stock.name;
         transaction.stockSymbol = stock.symbol;
@@ -428,13 +429,31 @@ router.post('/cancelOrder', async (req, resp) => {
             }
         });
 
-        await Stock.deleteOne({ _id: stockId }).then(function () {
-            common.log(userId, "/stock/cancelOrder", 'order cancelled!');
-            resp.status(200).json({ success: true });
-        }).catch(function (error) {
-            common.log(userId, "/stock/cancelOrder", 'order not cancelled!');
-            resp.status(500).json({ success: true, message: JSON.stringify(error) });
-        });
+        if (stock.type === 'Limit sell') {
+            common.log(userId, "/stock/cancelOrder err: ", " stock type limit sell: ", JSON.stringify(stock));
+            stock.price = stock.purchasePrice;
+            stock.type = 'Market buy';
+            stock.completed = true;
+
+            await stock.save(error => {
+                if (common.checkServerError(resp, error)) {
+                    common.log(userId, "/stock/cancelOrder err: ", error, ", req: ", JSON.stringify(stock));
+                }
+                else {
+                    common.log(userId, "/stock/cancelOrder", 'transaction created successfully!');
+                }
+            });
+            resp.status(200).json({ success: true, message: "Limit sell order cancelled" });
+        }
+        else {
+            await Stock.deleteOne({ _id: stockId }).then(function () {
+                common.log(userId, "/stock/cancelOrder", 'order cancelled!');
+                resp.status(200).json({ success: true, message: "Order cancelled" });
+            }).catch(function (error) {
+                common.log(userId, "/stock/cancelOrder", 'order not cancelled!');
+                resp.status(500).json({ success: true, message: JSON.stringify(error) });
+            });
+        }
     } catch (error) {
         common.log("", "/stock/cancelOrder: err", error);
         resp.status(500).json({ success: false, message: "Order cancel exception" });

@@ -18,6 +18,13 @@ const StockSchema = mongoose.Schema({
         required: true,
         min: [0, 'quantity cannot be below 0']
     },
+    purchasePrice: {
+        // price per stock
+        type: Number,
+        required: true,
+        default: 0,
+        min: [0, 'Balance cannot be below 0']
+    },
     price: {
         // price per stock
         type: Number,
