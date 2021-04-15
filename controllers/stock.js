@@ -233,7 +233,18 @@ router.post('/buyStock', async (req, resp) => {
             resp.status(400).json({ success: false, message: "No account found" });
             return;
         }
-        const orderAmount = reqBody.price * reqBody.quantity;
+
+        var forex = await api.getForex();
+        var exchangeRate = 1;
+        if (stock.currency == 'USD' && account?.currency != 'USD') {
+            exchangeRate = forex.USD_CAD;
+        } else if (stock.currency == 'CAD' && account?.currency != 'CAD') {
+            exchangeRate = forex.CAD_USD;
+        } else {
+            exchangeRate = exchangeRate;
+        }
+
+        const orderAmount = (reqBody.price * reqBody.quantity) * exchangeRate;
 
         if (reqBody.completed == true) {
             const newBalance = account.balance - orderAmount;
@@ -311,7 +322,16 @@ router.post('/sellStock', async (req, resp) => {
             return;
         }
 
-        const orderAmount = price * quantity;
+        var forex = await api.getForex();
+        var exchangeRate = 1;
+        if (stock.currency == 'USD' && account?.currency != 'USD') {
+            exchangeRate = forex.USD_CAD;
+        } else if (stock.currency == 'CAD' && account?.currency != 'CAD') {
+            exchangeRate = forex.CAD_USD;
+        } else {
+            exchangeRate = exchangeRate;
+        }
+        const orderAmount = (price * quantity) * exchangeRate;
         if (reqBody.completed == true) {
             const newBalance = account.balance + orderAmount;
             await Account.updateOne({ _id: accountId }, { balance: newBalance });
@@ -411,7 +431,17 @@ router.post('/cancelOrder', async (req, resp) => {
             return;
         }
 
-        const orderAmount = stock.price * stock.quantity;
+        var forex = await api.getForex();
+        var exchangeRate = 1;
+        if (stock.currency == 'USD' && account?.currency != 'USD') {
+            exchangeRate = forex.USD_CAD;
+        } else if (stock.currency == 'CAD' && account?.currency != 'CAD') {
+            exchangeRate = forex.CAD_USD;
+        } else {
+            exchangeRate = exchangeRate;
+        }
+
+        const orderAmount = (stock.price * stock.quantity) * exchangeRate;
         var transaction = new Transaction();
         transaction.name = stock.name;
         transaction.stockSymbol = stock.symbol;

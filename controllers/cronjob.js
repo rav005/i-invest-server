@@ -56,9 +56,9 @@ async function transaction() {
 
                     var exchangeRate = 1;
                     if (stock.currency == 'USD' && account?.currency != 'USD') {
-                        exchangeRate = forex.CAD_USD;
-                    } else if (stock.currency == 'CAD' && account?.currency != 'CAD') {
                         exchangeRate = forex.USD_CAD;
+                    } else if (stock.currency == 'CAD' && account?.currency != 'CAD') {
+                        exchangeRate = forex.CAD_USD;
                     } else {
                         exchangeRate = exchangeRate;
                     }
@@ -68,7 +68,6 @@ async function transaction() {
                     var orderFail = false;
                     if ((account.balance - orderTotal) < 0) {
                         orderFail = true;
-
                     }
 
                     var transaction = new Transaction();
